@@ -1,9 +1,14 @@
 import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
 import type { PaginatedEnvelope } from '../../../lib/api/pagination';
-import type { CreditCard, CreditCardDebt, FinanceSummary, Loan } from '../types';
+import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceSummary, Loan } from '../types';
 
 export async function getFinanceSummary() {
   const response = await apiRequest<ApiEnvelope<FinanceSummary>>('/finance/summary');
+  return response.data;
+}
+
+export async function getCurrentWeekDueDates() {
+  const response = await apiRequest<ApiEnvelope<CurrentWeekDueDates>>('/finance/current-week-due-dates');
   return response.data;
 }
 

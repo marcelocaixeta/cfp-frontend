@@ -11,6 +11,53 @@ export type FinanceSummary = {
   };
 };
 
+export type CurrentWeekCreditCardDebtDueDate = {
+  id: number;
+  tipo: 'divida_cartao_credito';
+  descricao: string;
+  data_vencimento: string;
+  valor: string;
+  valor_total: string;
+  parcela_atual: number;
+  quantidade_parcelas: number;
+  situacao: 'pending' | 'overdue';
+  cartao_credito?: {
+    id: number;
+    nome: string;
+  } | null;
+};
+
+export type CurrentWeekLoanInstallmentDueDate = {
+  id: number;
+  tipo: 'parcela_emprestimo';
+  emprestimo_id: number;
+  credor_nome: string;
+  descricao?: string | null;
+  data_vencimento: string;
+  valor: string;
+  numero_parcela: number;
+  situacao: 'pending' | 'overdue';
+};
+
+export type CurrentWeekDueDates = {
+  periodo: {
+    inicio: string;
+    fim: string;
+  };
+  dividas_cartao_credito: CurrentWeekCreditCardDebtDueDate[];
+  parcelas_emprestimos: CurrentWeekLoanInstallmentDueDate[];
+  totais: {
+    dividas_cartao_credito: {
+      count: number;
+      valor: string;
+    };
+    parcelas_emprestimos: {
+      count: number;
+      valor: string;
+    };
+  };
+};
+
 export type CreditCard = {
   id: number;
   nome: string;

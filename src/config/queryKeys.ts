@@ -12,6 +12,7 @@ export const queryKeys = {
   },
   finance: {
     summary: ['finance', 'summary'] as const,
+    currentWeekDueDates: ['finance', 'currentWeekDueDates'] as const,
     creditCards: ['finance', 'creditCards'] as const,
     creditCardDebts: ['finance', 'creditCardDebts'] as const,
     loans: ['finance', 'loans'] as const,
