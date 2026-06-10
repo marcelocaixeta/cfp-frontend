@@ -8,6 +8,7 @@ import { BtcDashboardPage } from '../../features/btc/pages/BtcDashboardPage';
 import { CreditCardDebtsPage } from '../../features/finance/pages/CreditCardDebtsPage';
 import { CreditCardsPage } from '../../features/finance/pages/CreditCardsPage';
 import { FinanceSummaryPage } from '../../features/finance/pages/FinanceSummaryPage';
+import { LoanFormPage } from '../../features/finance/pages/LoanFormPage';
 import { LoansPage } from '../../features/finance/pages/LoansPage';
 import { SettingsPage } from '../../features/settings/pages/SettingsPage';
 import { SupportTicketsPage } from '../../features/support/pages/SupportTicketsPage';
@@ -54,7 +55,7 @@ export const router = createBrowserRouter([
             element: <PlaceholderPage title="Detalhe da dívida" />,
           },
           { path: '/financas/emprestimos', element: <LoansPage /> },
-          { path: '/financas/emprestimos/novo', element: <PlaceholderPage title="Novo empréstimo" /> },
+          { path: '/financas/emprestimos/novo', element: <LoanFormPage /> },
           {
             path: '/financas/emprestimos/:id',
             element: <PlaceholderPage title="Detalhe do empréstimo" />,

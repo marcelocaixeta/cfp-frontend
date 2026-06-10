@@ -6,3 +6,11 @@ export function formatCurrency(value: number | string | null | undefined, curren
     currency,
   }).format(Number.isFinite(numericValue) ? numericValue : 0);
 }
+
+export function parseCurrency(value: string): string {
+  let result = value.replace(/^R\$\s*/i, '').trim();
+  if (result.includes(',')) {
+    result = result.replace(/\./g, '').replace(',', '.');
+  }
+  return result;
+}

@@ -21,3 +21,18 @@ export async function getLoans() {
   const response = await apiRequest<PaginatedEnvelope<Loan>>('/finance/loans');
   return response.data;
 }
+
+export async function createLoan(data: {
+  credor_nome: string;
+  descricao?: string;
+  valor_principal: string;
+  quantidade_parcelas: number;
+  valor_parcela: string;
+  primeira_data_vencimento: string;
+}) {
+  const response = await apiRequest<ApiEnvelope<Loan>>('/finance/loans', {
+    method: 'POST',
+    body: data,
+  });
+  return response.data;
+}
