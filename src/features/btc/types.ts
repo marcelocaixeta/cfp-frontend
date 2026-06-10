@@ -14,6 +14,21 @@ export type BtcAsset = {
   moeda: string;
 };
 
+export type BtcAddressBalance = {
+  address: string;
+  confirmed_balance_sats: number;
+  confirmed_balance_btc: string;
+  mempool_balance_sats: number;
+  mempool_balance_btc: string;
+  total_balance_sats: number;
+  total_balance_btc: string;
+  transaction_count: {
+    confirmed: number;
+    mempool: number;
+  };
+  source: string;
+};
+
 export type BtcDashboard = {
   moeda: string;
   preco_mais_recente?: BtcPriceSnapshot | null;

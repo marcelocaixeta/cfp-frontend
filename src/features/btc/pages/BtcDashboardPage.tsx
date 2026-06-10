@@ -9,7 +9,7 @@ import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { formatDate } from '../../../lib/formatting/date';
-import { formatNumber } from '../../../lib/formatting/number';
+import { formatBtc } from '../../../lib/formatting/number';
 import { getBtcDashboard } from '../api/btcApi';
 
 export function BtcDashboardPage() {
@@ -41,7 +41,7 @@ export function BtcDashboardPage() {
             </Card>
             <Card>
               <span className="kpi-label">Total BTC</span>
-              <strong className="kpi-value">{formatNumber(data.total_btc, 8)}</strong>
+              <strong className="kpi-value">{formatBtc(data.total_btc)}</strong>
               <span className="kpi-caption">{data.ativos.length} ativo(s) cadastrado(s)</span>
             </Card>
             <Card>
@@ -59,7 +59,7 @@ export function BtcDashboardPage() {
                     <span>{asset.moeda}</span>
                   </div>
                   <div>
-                    <strong>{formatNumber(asset.quantidade_btc, 8)} BTC</strong>
+                    <strong>{formatBtc(asset.quantidade_btc)} BTC</strong>
                     <span>Preço médio {formatCurrency(asset.preco_medio_compra, asset.moeda)}</span>
                   </div>
                 </Card>
