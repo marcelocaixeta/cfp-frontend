@@ -16,7 +16,7 @@ export function AuthLayout({ children, description, title }: AuthLayoutProps) {
           <span>{env.appName}</span>
         </div>
         <h1>Finanças pessoais e Bitcoin em uma rotina mais clara.</h1>
-        <p>Organize cartões, dívidas, empréstimos, ativos BTC e suporte em uma interface feita para consultar e agir rápido.</p>
+        <p>Organize cartões, dívidas, empréstimos, ativos e suporte em uma interface feita para consultar e agir rápido.</p>
       </section>
       <section className="auth-card" aria-labelledby="auth-title">
         <h2 id="auth-title">{title}</h2>
