@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
@@ -11,6 +12,8 @@ import { formatDate } from '../../../lib/formatting/date';
 import { getSupportTickets } from '../api/supportApi';
 
 export function SupportTicketsPage() {
+  const navigate = useNavigate();
+
   const { data, error, isLoading } = useQuery({
     queryKey: queryKeys.support.tickets,
     queryFn: getSupportTickets,
@@ -21,7 +24,7 @@ export function SupportTicketsPage() {
       <PageHeader
         title="Suporte"
         description="Chamados abertos, histórico de atendimento e prioridades."
-        action={<Button type="button">Novo chamado</Button>}
+        action={<Button onClick={() => navigate('/suporte/novo')} type="button">Novo chamado</Button>}
       />
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}

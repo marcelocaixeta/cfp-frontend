@@ -13,6 +13,7 @@ import { FinanceSummaryPage } from '../../features/finance/pages/FinanceSummaryP
 import { LoanFormPage } from '../../features/finance/pages/LoanFormPage';
 import { LoansPage } from '../../features/finance/pages/LoansPage';
 import { SettingsPage } from '../../features/settings/pages/SettingsPage';
+import { SupportTicketFormPage } from '../../features/support/pages/SupportTicketFormPage';
 import { SupportTicketsPage } from '../../features/support/pages/SupportTicketsPage';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { PlaceholderPage } from '../../pages/PlaceholderPage';
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
           },
           { path: '/configuracoes', element: <SettingsPage /> },
           { path: '/suporte', element: <SupportTicketsPage /> },
-          { path: '/suporte/novo', element: <PlaceholderPage title="Novo chamado" /> },
+          { path: '/suporte/novo', element: <SupportTicketFormPage /> },
           { path: '/suporte/:id', element: <PlaceholderPage title="Detalhe do chamado" /> },
           { path: '/perfil', element: <PlaceholderPage title="Perfil" /> },
         ],
