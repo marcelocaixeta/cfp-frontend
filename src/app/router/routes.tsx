@@ -5,6 +5,7 @@ import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
 import { BtcAssetsPage } from '../../features/btc/pages/BtcAssetsPage';
 import { BtcDashboardPage } from '../../features/btc/pages/BtcDashboardPage';
+import { CreditCardDebtFormPage } from '../../features/finance/pages/CreditCardDebtFormPage';
 import { CreditCardDebtsPage } from '../../features/finance/pages/CreditCardDebtsPage';
 import { CreditCardFormPage } from '../../features/finance/pages/CreditCardFormPage';
 import { CreditCardsPage } from '../../features/finance/pages/CreditCardsPage';
@@ -50,7 +51,7 @@ export const router = createBrowserRouter([
           { path: '/financas/cartoes/novo', element: <CreditCardFormPage /> },
           { path: '/financas/cartoes/:id', element: <PlaceholderPage title="Detalhe do cartão" /> },
           { path: '/financas/dividas-cartao', element: <CreditCardDebtsPage /> },
-          { path: '/financas/dividas-cartao/nova', element: <PlaceholderPage title="Nova dívida" /> },
+          { path: '/financas/dividas-cartao/nova', element: <CreditCardDebtFormPage /> },
           {
             path: '/financas/dividas-cartao/:id',
             element: <PlaceholderPage title="Detalhe da dívida" />,

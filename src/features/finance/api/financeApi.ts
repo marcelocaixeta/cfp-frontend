@@ -51,3 +51,18 @@ export async function createCreditCard(data: {
   });
   return response.data;
 }
+
+export async function createCreditCardDebt(data: {
+  credit_card_id: number;
+  descricao: string;
+  valor_total: string;
+  quantidade_parcelas: number;
+  valor_parcela: string;
+  primeira_data_vencimento: string;
+}) {
+  const response = await apiRequest<ApiEnvelope<CreditCardDebt>>('/finance/credit-card-debts', {
+    method: 'POST',
+    body: data,
+  });
+  return response.data;
+}
