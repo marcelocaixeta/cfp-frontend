@@ -6,6 +6,7 @@ import { RegisterPage } from '../../features/auth/pages/RegisterPage';
 import { BtcAssetsPage } from '../../features/btc/pages/BtcAssetsPage';
 import { BtcDashboardPage } from '../../features/btc/pages/BtcDashboardPage';
 import { CreditCardDebtsPage } from '../../features/finance/pages/CreditCardDebtsPage';
+import { CreditCardFormPage } from '../../features/finance/pages/CreditCardFormPage';
 import { CreditCardsPage } from '../../features/finance/pages/CreditCardsPage';
 import { FinanceSummaryPage } from '../../features/finance/pages/FinanceSummaryPage';
 import { LoanFormPage } from '../../features/finance/pages/LoanFormPage';
@@ -46,7 +47,7 @@ export const router = createBrowserRouter([
           { path: '/analises', element: <AnalyticsOverviewPage /> },
           { path: '/financas', element: <FinanceSummaryPage /> },
           { path: '/financas/cartoes', element: <CreditCardsPage /> },
-          { path: '/financas/cartoes/novo', element: <PlaceholderPage title="Novo cartão" /> },
+          { path: '/financas/cartoes/novo', element: <CreditCardFormPage /> },
           { path: '/financas/cartoes/:id', element: <PlaceholderPage title="Detalhe do cartão" /> },
           { path: '/financas/dividas-cartao', element: <CreditCardDebtsPage /> },
           { path: '/financas/dividas-cartao/nova', element: <PlaceholderPage title="Nova dívida" /> },

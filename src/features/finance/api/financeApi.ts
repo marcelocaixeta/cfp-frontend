@@ -36,3 +36,18 @@ export async function createLoan(data: {
   });
   return response.data;
 }
+
+export async function createCreditCard(data: {
+  nome: string;
+  bandeira?: string;
+  ultimos_quatro_digitos?: string;
+  limite_valor?: string;
+  dia_fechamento?: number | null;
+  dia_vencimento?: number | null;
+}) {
+  const response = await apiRequest<ApiEnvelope<CreditCard>>('/finance/credit-cards', {
+    method: 'POST',
+    body: data,
+  });
+  return response.data;
+}

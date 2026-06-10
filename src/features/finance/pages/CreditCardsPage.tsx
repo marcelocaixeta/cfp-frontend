@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
@@ -21,7 +22,7 @@ export function CreditCardsPage() {
       <PageHeader
         title="Cartões"
         description="Cartões de crédito usados para organizar limites, vencimentos e dívidas."
-        action={<Button type="button">Novo cartão</Button>}
+        action={<Link to="/financas/cartoes/novo"><Button type="button">Novo cartão</Button></Link>}
       />
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}
