@@ -2,6 +2,9 @@ export const queryKeys = {
   auth: {
     me: ['auth', 'me'] as const,
   },
+  admin: {
+    users: ['admin', 'users'] as const,
+  },
   btc: {
     dashboard: ['btc', 'dashboard'] as const,
     assets: ['btc', 'assets'] as const,
