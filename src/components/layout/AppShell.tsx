@@ -13,43 +13,81 @@ import {
   UserRound,
   WalletCards,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { env } from '../../config/env';
 import { useTheme } from '../../app/providers/useTheme';
 import { useAuth } from '../../features/auth/useAuth';
 import { IconButton } from '../ui/IconButton';
 
-const navItems = [
+type NavigationItem = {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  children?: string[];
+  parentPath?: string;
+};
+
+const navItems: NavigationItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/analises', label: 'Análises', icon: BarChart3 },
-  { to: '/financas', label: 'Resumo financeiro', icon: WalletCards },
-  { to: '/financas/cartoes', label: 'Cartões', icon: CreditCard },
-  { to: '/financas/dividas-cartao', label: 'Dívidas', icon: CreditCard },
-  { to: '/financas/emprestimos', label: 'Empréstimos', icon: WalletCards },
+  {
+    to: '/financas',
+    label: 'Resumo financeiro',
+    icon: WalletCards,
+    children: ['/financas/cartoes', '/financas/dividas-cartao', '/financas/emprestimos'],
+  },
+  { to: '/financas/cartoes', label: 'Cartões', icon: CreditCard, parentPath: '/financas' },
+  { to: '/financas/dividas-cartao', label: 'Dívidas', icon: CreditCard, parentPath: '/financas' },
+  { to: '/financas/emprestimos', label: 'Empréstimos', icon: WalletCards, parentPath: '/financas' },
   { to: '/btc/ativos', label: 'Ativos BTC', icon: Bitcoin },
   { to: '/suporte', label: 'Suporte', icon: Headphones },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
-const adminNavItems = [
+const adminNavItems: NavigationItem[] = [
   { to: '/admin/perfis', label: 'Perfis', icon: UserCog },
   { to: '/admin/suporte', label: 'Atender suporte', icon: Headphones },
 ];
 
+function isRouteMatch(pathname: string, itemPath: string) {
+  return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
+}
+
+function isNavItemActive(pathname: string, item: NavigationItem) {
+  if (item.children?.some((childPath) => isRouteMatch(pathname, childPath))) {
+    return false;
+  }
+
+  return isRouteMatch(pathname, item.to);
+}
+
 function Navigation({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
+  const { pathname } = useLocation();
   const visibleItems = isAdmin ? [...navItems, ...adminNavItems] : navItems;
+  const activeItem = visibleItems
+    .filter((item) => isNavItemActive(pathname, item))
+    .sort((currentItem, nextItem) => nextItem.to.length - currentItem.to.length)[0];
 
   return (
     <nav className="side-nav" aria-label="Navegação principal">
       {visibleItems.map((item) => {
         const Icon = item.icon;
+        const className = activeItem?.to === item.to ? 'side-nav__link active' : 'side-nav__link';
+
         return (
-          <NavLink className="side-nav__link" key={item.to} onClick={onNavigate} to={item.to}>
+          <Link
+            aria-current={activeItem?.to === item.to ? 'page' : undefined}
+            className={className}
+            key={item.to}
+            onClick={onNavigate}
+            to={item.to}
+          >
             <Icon size={18} aria-hidden="true" />
             <span>{item.label}</span>
-          </NavLink>
+          </Link>
         );
       })}
     </nav>
