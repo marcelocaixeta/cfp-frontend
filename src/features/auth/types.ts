@@ -30,3 +30,21 @@ export type RegisterInput = {
   senha: string;
   senha_confirmation: string;
 };
+
+export type ForgotPasswordInput = {
+  email: string;
+};
+
+export type ResetPasswordInput = {
+  token: string;
+  email: string;
+  senha: string;
+  senha_confirmation: string;
+};
+
+export type MessageResponse = {
+  data?: {
+    message?: string;
+  };
+  message?: string;
+};

@@ -1,5 +1,13 @@
 import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
-import type { AuthResponse, LoginInput, RegisterInput, User } from '../types';
+import type {
+  AuthResponse,
+  ForgotPasswordInput,
+  LoginInput,
+  MessageResponse,
+  RegisterInput,
+  ResetPasswordInput,
+  User,
+} from '../types';
 
 function unwrapAuth(response: AuthResponse) {
   const payload = response.data ?? response;
@@ -9,12 +17,29 @@ function unwrapAuth(response: AuthResponse) {
   };
 }
 
+function unwrapMessage(response: MessageResponse) {
+  const payload = response.data ?? response;
+  return payload.message ?? 'Solicitação concluída com sucesso.';
+}
+
 export async function login(input: LoginInput) {
   return unwrapAuth(await apiRequest<AuthResponse>('/auth/login', { method: 'POST', body: input, skipAuth: true }));
 }
 
 export async function register(input: RegisterInput) {
   return unwrapAuth(await apiRequest<AuthResponse>('/auth/register', { method: 'POST', body: input, skipAuth: true }));
+}
+
+export async function forgotPassword(input: ForgotPasswordInput) {
+  return unwrapMessage(
+    await apiRequest<MessageResponse>('/auth/forgot-password', { method: 'POST', body: input, skipAuth: true }),
+  );
+}
+
+export async function resetPassword(input: ResetPasswordInput) {
+  return unwrapMessage(
+    await apiRequest<MessageResponse>('/auth/reset-password', { method: 'POST', body: input, skipAuth: true }),
+  );
 }
 
 export async function logout() {

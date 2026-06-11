@@ -2,8 +2,10 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { AppShell } from '../../components/layout/AppShell';
 import { UserProfilesPage } from '../../features/admin/pages/UserProfilesPage';
 import { AnalyticsOverviewPage } from '../../features/analytics/pages/AnalyticsOverviewPage';
+import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
+import { ResetPasswordPage } from '../../features/auth/pages/ResetPasswordPage';
 import { BtcAssetsPage } from '../../features/btc/pages/BtcAssetsPage';
 import { BtcDashboardPage } from '../../features/btc/pages/BtcDashboardPage';
 import { CreditCardDebtFormPage } from '../../features/finance/pages/CreditCardDebtFormPage';
@@ -33,12 +35,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/esqueci-senha',
-    element: (
-      <PlaceholderPage
-        title="Recuperar senha"
-        description="Fluxo preparado para quando o backend disponibilizar recuperação de senha."
-      />
-    ),
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
+  },
+  {
+    path: '/redefinir-senha',
+    element: <ResetPasswordPage />,
   },
   {
     element: <ProtectedRoute />,
