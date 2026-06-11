@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, WalletCards } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '../../../components/layout/PageHeader';
@@ -10,108 +10,174 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
-import { formatBtc } from '../../../lib/formatting/number';
-import { getBtcAddressBalance, getBtcAssets } from '../api/btcApi';
-import { isValidBtcAddress } from '../lib/bitcoinAddress';
+import { formatBtc, formatNumber } from '../../../lib/formatting/number';
+import { createBtcAsset, getBtcAssets } from '../api/btcApi';
+import type { BtcAsset } from '../types';
+
+const SATOSHIS_PER_BTC = 100_000_000;
+const MAX_BTC_DECIMALS = 10;
+
+function getAssetBtc(asset: BtcAsset) {
+  return asset.quantidade_btc ?? asset.quantidade_satoshis / SATOSHIS_PER_BTC;
+}
+
+function parseDecimalInput(value: string) {
+  const normalizedValue = value.trim().replace(',', '.');
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  if (!/^\d+(\.\d{1,10})?$/.test(normalizedValue)) {
+    return Number.NaN;
+  }
+
+  return Number(normalizedValue);
+}
 
 export function BtcAssetsPage() {
-  const [address, setAddress] = useState('');
-  const [hasSubmittedBalance, setHasSubmittedBalance] = useState(false);
-  const [submittedAddress, setSubmittedAddress] = useState<string | undefined>(undefined);
+  const queryClient = useQueryClient();
+  const [rotulo, setRotulo] = useState('');
+  const [quantidadeBtc, setQuantidadeBtc] = useState('');
+  const [precoMedioCompra, setPrecoMedioCompra] = useState('');
+  const [moeda, setMoeda] = useState('BRL');
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<unknown>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data, error, isLoading } = useQuery({
     queryKey: queryKeys.btc.assets,
     queryFn: getBtcAssets,
   });
 
-  const {
-    data: balance,
-    error: balanceError,
-    isFetching: isBalanceLoading,
-    refetch: refetchBalance,
-  } = useQuery({
-    queryKey: queryKeys.btc.addressBalance(submittedAddress),
-    queryFn: () => getBtcAddressBalance(submittedAddress),
-    enabled: hasSubmittedBalance,
-  });
-
-  function handleBalanceSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextAddress = address.trim() || undefined;
-
-    if (nextAddress && !isValidBtcAddress(nextAddress)) {
-      setValidationMessage('Informe um endereço Bitcoin válido. O endereço digitado não passou na validação de checksum.');
-      return;
-    }
-
     setValidationMessage(null);
-    setHasSubmittedBalance(true);
+    setSuccessMessage(null);
+    setSubmitError(null);
 
-    if (hasSubmittedBalance && nextAddress === submittedAddress) {
-      refetchBalance();
+    const trimmedLabel = rotulo.trim();
+    const parsedBtcAmount = parseDecimalInput(quantidadeBtc);
+    const parsedAveragePrice = parseDecimalInput(precoMedioCompra);
+    const normalizedCurrency = moeda.trim().toUpperCase() || 'BRL';
+
+    if (!trimmedLabel) {
+      setValidationMessage('Informe um nome para identificar o ativo.');
       return;
     }
 
-    setSubmittedAddress(nextAddress);
+    if (parsedBtcAmount === undefined || !Number.isFinite(parsedBtcAmount) || parsedBtcAmount < 0) {
+      setValidationMessage(`Informe a quantidade em BTC com vírgula ou ponto e até ${MAX_BTC_DECIMALS} casas decimais.`);
+      return;
+    }
+
+    if (parsedAveragePrice !== undefined && (!Number.isFinite(parsedAveragePrice) || parsedAveragePrice < 0)) {
+      setValidationMessage(`Informe um preço médio válido, com vírgula ou ponto e até ${MAX_BTC_DECIMALS} casas decimais.`);
+      return;
+    }
+
+    if (!/^[A-Z]{3}$/.test(normalizedCurrency)) {
+      setValidationMessage('Informe a moeda com três letras, como BRL ou USD.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const parsedSatoshis = Math.round(parsedBtcAmount * SATOSHIS_PER_BTC);
+
+      await createBtcAsset({
+        rotulo: trimmedLabel,
+        quantidade_satoshis: parsedSatoshis,
+        preco_medio_compra: parsedAveragePrice,
+        moeda: normalizedCurrency,
+      });
+      setRotulo('');
+      setQuantidadeBtc('');
+      setPrecoMedioCompra('');
+      setMoeda('BRL');
+      setSuccessMessage('Ativo BTC cadastrado com sucesso.');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.btc.assets }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.btc.dashboard }),
+      ]);
+    } catch (err) {
+      setSubmitError(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <section className="page-stack">
       <PageHeader
         title="Ativos BTC"
-        description="Consulte o saldo de um endereço Bitcoin e acompanhe carteiras, corretoras e posições vinculadas ao seu usuário."
-        action={<Button type="button">Novo ativo</Button>}
+        description="Cadastre manualmente seus ativos em BTC e acompanhe as posições vinculadas ao seu usuário."
       />
       <Card>
-        <form className="btc-balance-form" onSubmit={handleBalanceSubmit}>
+        <div className="section-heading">
+          <div>
+            <span className="kpi-label">Cadastro manual</span>
+            <h2>Novo ativo BTC</h2>
+          </div>
+          <WalletCards size={22} aria-hidden="true" />
+        </div>
+        {validationMessage ? <Alert title="Dados inválidos" message={validationMessage} /> : null}
+        {submitError ? <Alert error={submitError} /> : null}
+        {successMessage ? (
+          <div className="success-message" role="status">
+            <Plus size={18} aria-hidden="true" />
+            <span>{successMessage}</span>
+          </div>
+        ) : null}
+        <form className="form btc-asset-form" onSubmit={handleSubmit}>
           <label className="field">
-            <span>Endereço Bitcoin</span>
+            <span>Nome do ativo</span>
             <input
               autoComplete="off"
-              onChange={(event) => setAddress(event.target.value)}
-              placeholder="Use o endereço padrão do backend ou informe um endereço"
+              onChange={(event) => setRotulo(event.target.value)}
+              placeholder="Carteira principal, corretora, hardware wallet..."
               type="text"
-              value={address}
+              value={rotulo}
             />
           </label>
-          <Button disabled={isBalanceLoading} icon={<Search size={18} />} type="submit">
-            {isBalanceLoading ? 'Consultando...' : 'Consultar saldo'}
+          <label className="field">
+            <span>Quantidade em BTC</span>
+            <input
+              autoComplete="off"
+              inputMode="decimal"
+              onChange={(event) => setQuantidadeBtc(event.target.value)}
+              placeholder="Ex.: 0,01667365"
+              type="text"
+              value={quantidadeBtc}
+            />
+          </label>
+          <label className="field">
+            <span>Preço médio de compra</span>
+            <input
+              autoComplete="off"
+              inputMode="decimal"
+              onChange={(event) => setPrecoMedioCompra(event.target.value)}
+              placeholder="Opcional"
+              type="text"
+              value={precoMedioCompra}
+            />
+          </label>
+          <label className="field">
+            <span>Moeda</span>
+            <input
+              autoCapitalize="characters"
+              maxLength={3}
+              onChange={(event) => setMoeda(event.target.value)}
+              type="text"
+              value={moeda}
+            />
+          </label>
+          <Button disabled={isSubmitting} icon={<Plus size={18} />} type="submit">
+            {isSubmitting ? 'Salvando...' : 'Cadastrar ativo'}
           </Button>
         </form>
-        {validationMessage ? <Alert title="Endereço inválido" message={validationMessage} /> : null}
-        {balanceError ? <Alert error={balanceError} /> : null}
-        {balance && !validationMessage ? (
-          <>
-            <div className="kpi-grid btc-balance-grid">
-              <div className="btc-balance-metric">
-                <span className="kpi-label">Saldo total</span>
-                <strong className="kpi-value">{formatBtc(balance.total_balance_btc)} BTC</strong>
-                <span className="kpi-caption">{balance.total_balance_sats.toLocaleString('pt-BR')} sats</span>
-              </div>
-              <div className="btc-balance-metric">
-                <span className="kpi-label">Confirmado</span>
-                <strong className="kpi-value">{formatBtc(balance.confirmed_balance_btc)} BTC</strong>
-                <span className="kpi-caption">{balance.transaction_count.confirmed} transação(ões)</span>
-              </div>
-              <div className="btc-balance-metric">
-                <span className="kpi-label">Mempool</span>
-                <strong className="kpi-value">{formatBtc(balance.mempool_balance_btc)} BTC</strong>
-                <span className="kpi-caption">{balance.transaction_count.mempool} transação(ões)</span>
-              </div>
-            </div>
-            <dl className="details-list btc-balance-details">
-              <div>
-                <dt>Endereço consultado</dt>
-                <dd>{balance.address}</dd>
-              </div>
-              <div>
-                <dt>Fonte</dt>
-                <dd>{balance.source}</dd>
-              </div>
-            </dl>
-          </>
-        ) : null}
       </Card>
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}
@@ -124,8 +190,12 @@ export function BtcAssetsPage() {
                 <span>{asset.moeda}</span>
               </div>
               <div>
-                <strong>{formatBtc(asset.quantidade_btc)} BTC</strong>
-                <span>Preço médio {formatCurrency(asset.preco_medio_compra, asset.moeda)}</span>
+                <strong>{formatNumber(asset.quantidade_satoshis, 0)} sats</strong>
+                <span>{formatBtc(getAssetBtc(asset))} BTC</span>
+              </div>
+              <div>
+                <strong>Preço médio</strong>
+                <span>{asset.preco_medio_compra ? formatCurrency(asset.preco_medio_compra, asset.moeda) : '-'}</span>
               </div>
             </Card>
           ))}

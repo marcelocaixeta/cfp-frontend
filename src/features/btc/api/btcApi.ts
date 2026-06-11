@@ -1,6 +1,6 @@
 import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
 import type { PaginatedEnvelope } from '../../../lib/api/pagination';
-import type { BtcAddressBalance, BtcAsset, BtcDashboard } from '../types';
+import type { BtcAsset, BtcDashboard } from '../types';
 
 export async function getBtcDashboard() {
   const response = await apiRequest<ApiEnvelope<BtcDashboard>>('/btc/dashboard');
@@ -12,17 +12,15 @@ export async function getBtcAssets() {
   return response.data;
 }
 
-export async function getBtcAddressBalance(address?: string) {
-  const params = new URLSearchParams();
-
-  if (address?.trim()) {
-    params.set('address', address.trim());
-  }
-
-  const queryString = params.toString();
-  const response = await apiRequest<ApiEnvelope<BtcAddressBalance>>(
-    `/btc/address-balance${queryString ? `?${queryString}` : ''}`,
-  );
-
+export async function createBtcAsset(data: {
+  rotulo: string;
+  quantidade_satoshis: number;
+  preco_medio_compra?: number;
+  moeda?: string;
+}) {
+  const response = await apiRequest<ApiEnvelope<BtcAsset>>('/btc/assets', {
+    method: 'POST',
+    body: data,
+  });
   return response.data;
 }

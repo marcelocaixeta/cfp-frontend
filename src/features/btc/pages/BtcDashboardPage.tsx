@@ -9,8 +9,15 @@ import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { formatDate } from '../../../lib/formatting/date';
-import { formatBtc } from '../../../lib/formatting/number';
+import { formatBtc, formatNumber } from '../../../lib/formatting/number';
 import { getBtcDashboard } from '../api/btcApi';
+import type { BtcAsset } from '../types';
+
+const SATOSHIS_PER_BTC = 100_000_000;
+
+function getAssetBtc(asset: BtcAsset) {
+  return asset.quantidade_btc ?? asset.quantidade_satoshis / SATOSHIS_PER_BTC;
+}
 
 export function BtcDashboardPage() {
   const { data, error, isLoading } = useQuery({
@@ -59,8 +66,12 @@ export function BtcDashboardPage() {
                     <span>{asset.moeda}</span>
                   </div>
                   <div>
-                    <strong>{formatBtc(asset.quantidade_btc)} BTC</strong>
-                    <span>Preço médio {formatCurrency(asset.preco_medio_compra, asset.moeda)}</span>
+                    <strong>{formatNumber(asset.quantidade_satoshis, 0)} sats</strong>
+                    <span>{formatBtc(getAssetBtc(asset))} BTC</span>
+                  </div>
+                  <div>
+                    <strong>Preço médio</strong>
+                    <span>{asset.preco_medio_compra ? formatCurrency(asset.preco_medio_compra, asset.moeda) : '-'}</span>
                   </div>
                 </Card>
               ))}

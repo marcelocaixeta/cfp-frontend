@@ -744,15 +744,11 @@ a:hover {
   font-size: 0.9rem;
 }
 
-.btc-balance-form {
+.btc-asset-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(190px, 1.4fr) minmax(160px, 0.9fr) minmax(160px, 0.9fr) minmax(90px, 0.4fr) auto;
   gap: 12px;
   align-items: end;
-}
-
-.btc-balance-grid {
-  margin-top: 16px;
 }
 
 .btc-balance-metric {
@@ -824,7 +820,7 @@ a:hover {
     align-items: start;
   }
 
-  .btc-balance-form {
+  .btc-asset-form {
     grid-template-columns: 1fr;
   }
 

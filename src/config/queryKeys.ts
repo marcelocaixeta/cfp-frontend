@@ -8,7 +8,6 @@ export const queryKeys = {
   btc: {
     dashboard: ['btc', 'dashboard'] as const,
     assets: ['btc', 'assets'] as const,
-    addressBalance: (address?: string) => ['btc', 'addressBalance', address ?? 'default'] as const,
   },
   analytics: {
     overview: ['analytics', 'overview'] as const,
