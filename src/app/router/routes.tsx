@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AppShell } from '../../components/layout/AppShell';
+import { UserProfilesPage } from '../../features/admin/pages/UserProfilesPage';
 import { AnalyticsOverviewPage } from '../../features/analytics/pages/AnalyticsOverviewPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
@@ -17,6 +18,7 @@ import { SupportTicketFormPage } from '../../features/support/pages/SupportTicke
 import { SupportTicketsPage } from '../../features/support/pages/SupportTicketsPage';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { PlaceholderPage } from '../../pages/PlaceholderPage';
+import { AdminRoute } from './AdminRoute';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -64,6 +66,10 @@ export const router = createBrowserRouter([
             element: <PlaceholderPage title="Detalhe do empréstimo" />,
           },
           { path: '/configuracoes', element: <SettingsPage /> },
+          {
+            element: <AdminRoute />,
+            children: [{ path: '/admin/perfis', element: <UserProfilesPage /> }],
+          },
           { path: '/suporte', element: <SupportTicketsPage /> },
           { path: '/suporte/novo', element: <SupportTicketFormPage /> },
           { path: '/suporte/:id', element: <PlaceholderPage title="Detalhe do chamado" /> },

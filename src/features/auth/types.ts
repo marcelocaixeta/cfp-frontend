@@ -3,6 +3,7 @@ export type User = {
   nome?: string;
   name?: string;
   email: string;
+  perfil?: 'admin' | 'usuario';
 };
 
 export type AuthResponse = {

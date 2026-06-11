@@ -61,6 +61,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(response.user);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const currentUser = await getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       if (getAuthToken()) {
@@ -81,9 +86,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isInitializing,
       login,
       register,
+      refreshUser,
       logout,
     }),
-    [isInitializing, login, logout, register, user],
+    [isInitializing, login, logout, refreshUser, register, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -9,6 +9,7 @@ import {
   Moon,
   Settings,
   Sun,
+  UserCog,
   UserRound,
   WalletCards,
   X,
@@ -32,10 +33,16 @@ const navItems = [
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
-function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+const adminNavItems = [
+  { to: '/admin/perfis', label: 'Perfis', icon: UserCog },
+];
+
+function Navigation({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
+  const visibleItems = isAdmin ? [...navItems, ...adminNavItems] : navItems;
+
   return (
     <nav className="side-nav" aria-label="Navegação principal">
-      {navItems.map((item) => {
+      {visibleItems.map((item) => {
         const Icon = item.icon;
         return (
           <NavLink className="side-nav__link" key={item.to} onClick={onNavigate} to={item.to}>
@@ -52,6 +59,7 @@ export function AppShell() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { logout, user } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
+  const isAdmin = user?.perfil === 'admin';
 
   return (
     <div className="app-shell">
@@ -60,7 +68,7 @@ export function AppShell() {
           <span className="brand__mark">C</span>
           <span>{env.appName}</span>
         </div>
-        <Navigation />
+        <Navigation isAdmin={isAdmin} />
       </aside>
 
       <div className="app-shell__main">
@@ -101,7 +109,7 @@ export function AppShell() {
                 <X size={20} />
               </IconButton>
             </div>
-            <Navigation onNavigate={() => setIsDrawerOpen(false)} />
+            <Navigation isAdmin={isAdmin} onNavigate={() => setIsDrawerOpen(false)} />
           </div>
         </div>
       ) : null}
