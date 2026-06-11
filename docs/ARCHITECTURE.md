@@ -271,7 +271,7 @@ Rotas publicas:
 | --- | --- | --- |
 | `/login` | `LoginPage` | Entrar com email e senha |
 | `/cadastro` | `RegisterPage` | Criar conta |
-| `/esqueci-senha` | `ForgotPasswordPage` | Preparada para recuperacao futura |
+| `/esqueci-senha` | `PlaceholderPage` | Preparada para recuperacao futura |
 
 Rotas autenticadas:
 
@@ -279,23 +279,25 @@ Rotas autenticadas:
 | --- | --- | --- |
 | `/` | `HomeRedirect` | Redireciona para `/dashboard` |
 | `/dashboard` | `BtcDashboardPage` | `GET /btc/dashboard` |
-| `/btc/ativos` | `BtcAssetsPage` | `GET /btc/assets` |
+| `/btc/ativos` | `BtcAssetsPage` | `GET /btc/assets`, `POST /btc/assets` |
 | `/analises` | `AnalyticsOverviewPage` | `GET /analytics/overview` |
 | `/financas` | `FinanceSummaryPage` | `GET /finance/summary` |
 | `/financas/cartoes` | `CreditCardsPage` | `GET /finance/credit-cards` |
 | `/financas/cartoes/novo` | `CreditCardFormPage` | `POST /finance/credit-cards` |
-| `/financas/cartoes/:id` | `CreditCardDetailPage` | `GET /finance/credit-cards/{creditCard}` |
+| `/financas/cartoes/:id` | `PlaceholderPage` | Preparada para detalhe futuro do cartao |
 | `/financas/dividas-cartao` | `CreditCardDebtsPage` | `GET /finance/credit-card-debts` |
 | `/financas/dividas-cartao/nova` | `CreditCardDebtFormPage` | `POST /finance/credit-card-debts` |
-| `/financas/dividas-cartao/:id` | `CreditCardDebtDetailPage` | `GET /finance/credit-card-debts/{debt}` |
+| `/financas/dividas-cartao/:id` | `PlaceholderPage` | Preparada para detalhe futuro da divida |
 | `/financas/emprestimos` | `LoansPage` | `GET /finance/loans` |
 | `/financas/emprestimos/novo` | `LoanFormPage` | `POST /finance/loans` |
-| `/financas/emprestimos/:id` | `LoanDetailPage` | `GET /finance/loans/{loan}` |
+| `/financas/emprestimos/:id` | `PlaceholderPage` | Preparada para detalhe futuro do emprestimo |
 | `/configuracoes` | `SettingsPage` | `GET /settings` |
+| `/admin/perfis` | `UserProfilesPage` | `GET /users`, `PATCH /users/{user}/profile` |
+| `/admin/suporte` | `AdminSupportTicketsPage` | `GET /support/tickets/all`, `POST /support/tickets/{supportTicket}/messages`, `PATCH /support/tickets/{supportTicket}/resolve` |
 | `/suporte` | `SupportTicketsPage` | `GET /support/tickets` |
 | `/suporte/novo` | `SupportTicketFormPage` | `POST /support/tickets` |
-| `/suporte/:id` | `SupportTicketDetailPage` | `GET /support/tickets/{ticket}` |
-| `/perfil` | `ProfilePage` | `GET /me` |
+| `/suporte/:id` | `PlaceholderPage` | Preparada para detalhe futuro do chamado |
+| `/perfil` | `PlaceholderPage` | Preparada para perfil futuro |
 
 Rotas de fallback:
 
@@ -314,8 +316,6 @@ http://localhost:8000/api/v1
 Endpoints publicos:
 
 ```text
-GET    /health
-POST   /email-signups
 POST   /auth/register
 POST   /auth/login
 ```
@@ -325,49 +325,35 @@ Endpoints autenticados:
 ```text
 POST   /auth/logout
 GET    /me
-PATCH  /me
+
+GET    /users
+PATCH  /users/{user}/profile
 
 GET    /finance/summary
+GET    /finance/current-week-due-dates
 
 GET    /finance/credit-cards
 POST   /finance/credit-cards
-GET    /finance/credit-cards/{creditCard}
-PATCH  /finance/credit-cards/{creditCard}
-DELETE /finance/credit-cards/{creditCard}
 
 GET    /finance/credit-card-debts
 POST   /finance/credit-card-debts
-GET    /finance/credit-card-debts/{debt}
-PATCH  /finance/credit-card-debts/{debt}
-DELETE /finance/credit-card-debts/{debt}
 
 GET    /finance/loans
 POST   /finance/loans
-GET    /finance/loans/{loan}
-PATCH  /finance/loans/{loan}
-DELETE /finance/loans/{loan}
-
-GET    /finance/loans/{loan}/installments
-PATCH  /finance/loan-installments/{loanInstallment}
 
 GET    /btc/dashboard
 GET    /btc/assets
 POST   /btc/assets
-GET    /btc/assets/{btcAsset}
-PATCH  /btc/assets/{btcAsset}
-DELETE /btc/assets/{btcAsset}
 
 GET    /analytics/overview
 
 GET    /settings
-PATCH  /settings
 
+GET    /support/tickets/all
 GET    /support/tickets
 POST   /support/tickets
-GET    /support/tickets/{supportTicket}
-PATCH  /support/tickets/{supportTicket}
-DELETE /support/tickets/{supportTicket}
 POST   /support/tickets/{supportTicket}/messages
+PATCH  /support/tickets/{supportTicket}/resolve
 ```
 
 ## Modulos
@@ -386,8 +372,8 @@ Paginas:
 
 - `LoginPage`
 - `RegisterPage`
-- `ForgotPasswordPage`
-- `ProfilePage`
+- `PlaceholderPage` para recuperacao de senha futura
+- `PlaceholderPage` para perfil futuro
 
 APIs:
 
@@ -395,7 +381,6 @@ APIs:
 - `register(payload)`
 - `logout()`
 - `getCurrentUser()`
-- `updateCurrentUser(payload)`
 
 ### 2. Dashboard BTC
 
@@ -410,7 +395,6 @@ Paginas:
 
 - `BtcDashboardPage`
 - `BtcAssetsPage`
-- `BtcAssetFormPage`
 
 Componentes:
 
@@ -453,13 +437,11 @@ Paginas:
 - `FinanceSummaryPage`
 - `CreditCardsPage`
 - `CreditCardFormPage`
-- `CreditCardDetailPage`
 - `CreditCardDebtsPage`
 - `CreditCardDebtFormPage`
-- `CreditCardDebtDetailPage`
 - `LoansPage`
 - `LoanFormPage`
-- `LoanDetailPage`
+- `PlaceholderPage` para detalhes futuros de cartao, divida e emprestimo
 
 Componentes:
 
@@ -497,14 +479,16 @@ Responsabilidades:
 
 - Listar chamados do usuario.
 - Criar chamados.
-- Exibir detalhe e historico de mensagens.
-- Enviar novas mensagens.
+- Preparar detalhe futuro do chamado.
+- Permitir que administradores visualizem todos os chamados abertos.
+- Permitir que administradores respondam e resolvam chamados.
 
 Paginas:
 
 - `SupportTicketsPage`
 - `SupportTicketFormPage`
-- `SupportTicketDetailPage`
+- `AdminSupportTicketsPage`
+- `PlaceholderPage` para detalhe futuro do chamado
 
 Componentes:
 
@@ -512,6 +496,19 @@ Componentes:
 - `SupportTicketTimeline`
 - `SupportMessageForm`
 - `TicketStatusBadge`
+
+### 7. Administracao
+
+Responsabilidades:
+
+- Restringir telas administrativas a usuarios com `perfil` igual a `admin`.
+- Gerenciar perfis de acesso dos usuarios.
+- Atender chamados de suporte em uma fila administrativa.
+
+Paginas:
+
+- `UserProfilesPage`
+- `AdminSupportTicketsPage`
 
 ## Layout e Experiencia do Usuario
 
