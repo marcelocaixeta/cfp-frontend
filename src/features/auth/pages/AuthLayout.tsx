@@ -15,7 +15,7 @@ export function AuthLayout({ children, description, title }: AuthLayoutProps) {
           <span className="brand__mark">C</span>
           <span>{env.appName}</span>
         </div>
-        <h1>Finanças pessoais e Bitcoin em uma rotina mais clara.</h1>
+        <h1>Finanças pessoais e ativos financeiros em uma rotina mais clara.</h1>
         <p>Organize cartões, dívidas, empréstimos, ativos e suporte em uma interface feita para consultar e agir rápido.</p>
       </section>
       <section className="auth-card" aria-labelledby="auth-title">
