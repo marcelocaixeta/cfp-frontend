@@ -40,7 +40,12 @@ const navItems: NavigationItem[] = [
     children: ['/financas/cartoes', '/financas/dividas-cartao', '/financas/emprestimos'],
   },
   { to: '/financas/cartoes', label: 'Cartões', icon: CreditCard, parentPath: '/financas' },
-  { to: '/financas/dividas-cartao', label: 'Dívidas', icon: CreditCard, parentPath: '/financas' },
+  {
+    to: '/financas/dividas-cartao',
+    label: 'Gastos com o cartão de crédito',
+    icon: CreditCard,
+    parentPath: '/financas',
+  },
   { to: '/financas/emprestimos', label: 'Empréstimos', icon: WalletCards, parentPath: '/financas' },
   { to: '/btc/ativos', label: 'Ativos BTC', icon: Bitcoin },
   { to: '/suporte', label: 'Suporte', icon: Headphones },

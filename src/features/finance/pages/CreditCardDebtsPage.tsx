@@ -23,7 +23,7 @@ export function CreditCardDebtsPage() {
       <PageHeader
         title="Dívidas de cartão"
         description="Compras parceladas, valores pendentes e vencimentos por usuário."
-        action={<Link to="/financas/dividas-cartao/nova"><Button type="button">Nova dívida</Button></Link>}
+        action={<Link to="/financas/dividas-cartao/nova"><Button type="button">Novo Gasto com o Cartão</Button></Link>}
       />
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}
