@@ -14,6 +14,7 @@ import { FinanceSummaryPage } from '../../features/finance/pages/FinanceSummaryP
 import { LoanFormPage } from '../../features/finance/pages/LoanFormPage';
 import { LoansPage } from '../../features/finance/pages/LoansPage';
 import { SettingsPage } from '../../features/settings/pages/SettingsPage';
+import { AdminSupportTicketsPage } from '../../features/support/pages/AdminSupportTicketsPage';
 import { SupportTicketFormPage } from '../../features/support/pages/SupportTicketFormPage';
 import { SupportTicketsPage } from '../../features/support/pages/SupportTicketsPage';
 import { NotFoundPage } from '../../pages/NotFoundPage';
@@ -68,7 +69,10 @@ export const router = createBrowserRouter([
           { path: '/configuracoes', element: <SettingsPage /> },
           {
             element: <AdminRoute />,
-            children: [{ path: '/admin/perfis', element: <UserProfilesPage /> }],
+            children: [
+              { path: '/admin/perfis', element: <UserProfilesPage /> },
+              { path: '/admin/suporte', element: <AdminSupportTicketsPage /> },
+            ],
           },
           { path: '/suporte', element: <SupportTicketsPage /> },
           { path: '/suporte/novo', element: <SupportTicketFormPage /> },

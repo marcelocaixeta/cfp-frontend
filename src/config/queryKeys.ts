@@ -25,5 +25,6 @@ export const queryKeys = {
   },
   support: {
     tickets: ['support', 'tickets'] as const,
+    allTickets: ['support', 'tickets', 'all'] as const,
   },
 };

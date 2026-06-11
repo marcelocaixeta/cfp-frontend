@@ -35,6 +35,7 @@ const navItems = [
 
 const adminNavItems = [
   { to: '/admin/perfis', label: 'Perfis', icon: UserCog },
+  { to: '/admin/suporte', label: 'Atender suporte', icon: Headphones },
 ];
 
 function Navigation({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {

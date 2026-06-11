@@ -7,3 +7,9 @@ export type SupportTicket = {
   messages_count?: number;
   criado_em?: string;
 };
+
+export type SupportTicketMessage = {
+  id: number;
+  mensagem: string;
+  criado_em?: string;
+};

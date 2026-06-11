@@ -582,6 +582,69 @@ a:hover {
   gap: 14px;
 }
 
+.support-admin-list {
+  display: grid;
+  gap: 14px;
+}
+
+.support-admin-card {
+  display: grid;
+  gap: 16px;
+}
+
+.support-admin-card__summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.support-admin-card__summary h2 {
+  margin: 4px 0;
+  font-size: 1.08rem;
+}
+
+.support-admin-card__badges,
+.support-admin-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.support-admin-card__badges {
+  justify-content: flex-end;
+}
+
+.support-admin-card__actions {
+  justify-content: flex-start;
+}
+
+.support-admin-card__meta {
+  display: grid;
+  margin: 0;
+}
+
+.support-admin-card__meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: 10px 12px;
+}
+
+.support-admin-card__meta dt {
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.support-admin-card__meta dd {
+  margin: 0;
+  font-weight: 800;
+  text-align: right;
+}
+
 .segmented-control {
   display: flex;
   flex-wrap: wrap;
@@ -790,5 +853,15 @@ a:hover {
 
   .segmented-control .button {
     flex: 1 1 110px;
+  }
+
+  .support-admin-card__summary {
+    display: grid;
+  }
+
+  .support-admin-card__badges,
+  .support-admin-card__actions,
+  .support-admin-card__actions .button {
+    width: 100%;
   }
 }
