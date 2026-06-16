@@ -81,6 +81,18 @@ export type CreditCardDebt = {
   credit_card?: CreditCard | null;
 };
 
+export type HomeBillType = 'agua' | 'luz' | 'telefone';
+
+export type HomeBill = {
+  id: number;
+  tipo: HomeBillType;
+  fornecedor_nome?: string | null;
+  descricao: string;
+  valor: string;
+  data_vencimento: string;
+  situacao: 'pending' | 'paid' | 'overdue' | 'canceled';
+};
+
 export type Loan = {
   id: number;
   credor_nome: string;

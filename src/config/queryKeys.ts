@@ -17,6 +17,7 @@ export const queryKeys = {
     currentWeekDueDates: ['finance', 'currentWeekDueDates'] as const,
     creditCards: ['finance', 'creditCards'] as const,
     creditCardDebts: ['finance', 'creditCardDebts'] as const,
+    homeBills: ['finance', 'homeBills'] as const,
     loans: ['finance', 'loans'] as const,
   },
   settings: {

@@ -1,6 +1,6 @@
 import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
 import type { PaginatedEnvelope } from '../../../lib/api/pagination';
-import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceSummary, Loan } from '../types';
+import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceSummary, HomeBill, HomeBillType, Loan } from '../types';
 
 export async function getFinanceSummary() {
   const response = await apiRequest<ApiEnvelope<FinanceSummary>>('/finance/summary');
@@ -19,6 +19,11 @@ export async function getCreditCards() {
 
 export async function getCreditCardDebts() {
   const response = await apiRequest<PaginatedEnvelope<CreditCardDebt>>('/finance/credit-card-debts');
+  return response.data;
+}
+
+export async function getHomeBills() {
+  const response = await apiRequest<PaginatedEnvelope<HomeBill>>('/finance/home-bills');
   return response.data;
 }
 
@@ -66,6 +71,20 @@ export async function createCreditCardDebt(data: {
   primeira_data_vencimento: string;
 }) {
   const response = await apiRequest<ApiEnvelope<CreditCardDebt>>('/finance/credit-card-debts', {
+    method: 'POST',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function createHomeBill(data: {
+  tipo: HomeBillType;
+  fornecedor_nome: string;
+  descricao: string;
+  valor: string;
+  data_vencimento: string;
+}) {
+  const response = await apiRequest<ApiEnvelope<HomeBill>>('/finance/home-bills', {
     method: 'POST',
     body: data,
   });

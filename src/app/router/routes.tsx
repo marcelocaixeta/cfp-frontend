@@ -13,6 +13,8 @@ import { CreditCardDebtsPage } from '../../features/finance/pages/CreditCardDebt
 import { CreditCardFormPage } from '../../features/finance/pages/CreditCardFormPage';
 import { CreditCardsPage } from '../../features/finance/pages/CreditCardsPage';
 import { FinanceSummaryPage } from '../../features/finance/pages/FinanceSummaryPage';
+import { HomeBillFormPage } from '../../features/finance/pages/HomeBillFormPage';
+import { HomeBillsPage } from '../../features/finance/pages/HomeBillsPage';
 import { LoanFormPage } from '../../features/finance/pages/LoanFormPage';
 import { LoansPage } from '../../features/finance/pages/LoansPage';
 import { SettingsPage } from '../../features/settings/pages/SettingsPage';
@@ -61,6 +63,12 @@ export const router = createBrowserRouter([
           { path: '/financas/cartoes/:id', element: <PlaceholderPage title="Detalhe do cartão" /> },
           { path: '/financas/dividas-cartao', element: <CreditCardDebtsPage /> },
           { path: '/financas/dividas-cartao/nova', element: <CreditCardDebtFormPage /> },
+          { path: '/financas/contas-casa', element: <HomeBillsPage /> },
+          { path: '/financas/contas-casa/nova', element: <HomeBillFormPage /> },
+          {
+            path: '/financas/contas-casa/:id',
+            element: <PlaceholderPage title="Detalhe da conta de casa" />,
+          },
           {
             path: '/financas/dividas-cartao/:id',
             element: <PlaceholderPage title="Detalhe da dívida" />,

@@ -18,7 +18,7 @@ export function FinanceSummaryPage() {
     <section className="page-stack">
       <PageHeader
         title="Resumo financeiro"
-        description="Acompanhe dívidas de cartão, empréstimos e parcelas pendentes."
+        description="Acompanhe dívidas de cartão, contas de casa, empréstimos e parcelas pendentes."
         action={<span className="sync-pill">Atualizado pela API</span>}
       />
       {isLoading ? <Skeleton lines={6} /> : null}
@@ -50,6 +50,7 @@ export function FinanceSummaryPage() {
           <div className="quick-actions">
             <Link to="/financas/cartoes">Ver cartões</Link>
             <Link to="/financas/dividas-cartao">Ver dívidas</Link>
+            <Link to="/financas/contas-casa">Ver contas de casa</Link>
             <Link to="/financas/emprestimos">Ver empréstimos</Link>
           </div>
         </>
