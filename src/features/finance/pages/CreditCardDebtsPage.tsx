@@ -11,6 +11,20 @@ import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { formatDate } from '../../../lib/formatting/date';
 import { getCreditCardDebts } from '../api/financeApi';
+import type { CreditCardDebt } from '../types';
+
+function formatCreditCardLabel(debt: CreditCardDebt) {
+  const card = debt.credit_card;
+
+  if (!card) {
+    return 'Cartão';
+  }
+
+  const brand = card.bandeira ?? card.nome;
+  const lastDigits = card.ultimos_quatro_digitos ? ` final ${card.ultimos_quatro_digitos}` : '';
+
+  return `${brand}${lastDigits}`;
+}
 
 export function CreditCardDebtsPage() {
   const { data, error, isLoading } = useQuery({
@@ -34,7 +48,8 @@ export function CreditCardDebtsPage() {
               <div>
                 <strong>{debt.descricao}</strong>
                 <span>
-                  Parcela {debt.parcela_atual}/{debt.quantidade_parcelas} · vence {formatDate(debt.primeira_data_vencimento)}
+                  Parcela {debt.parcela_atual}/{debt.quantidade_parcelas} · {formatCreditCardLabel(debt)} · vence{' '}
+                  {formatDate(debt.primeira_data_vencimento)}
                 </span>
               </div>
               <div>
