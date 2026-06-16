@@ -22,7 +22,7 @@ export function LoansPage() {
     <section className="page-stack">
       <PageHeader
         title="Empréstimos"
-        description="Contratos, parcelas e vencimentos gerados automaticamente pelo backend."
+        description="Contratos, parcelas e vencimentos."
         action={<Link to="/financas/emprestimos/novo"><Button type="button">Novo empréstimo</Button></Link>}
       />
       {isLoading ? <Skeleton lines={5} /> : null}
