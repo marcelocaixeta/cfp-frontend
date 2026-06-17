@@ -16,7 +16,11 @@ import type { BtcAsset } from '../types';
 const SATOSHIS_PER_BTC = 100_000_000;
 
 function getAssetBtc(asset: BtcAsset) {
-  return asset.quantidade_btc ?? asset.quantidade_satoshis / SATOSHIS_PER_BTC;
+  return asset.quantidade_btc ?? Number(asset.quantidade_satoshis ?? 0) / SATOSHIS_PER_BTC;
+}
+
+function isBtcAsset(asset: BtcAsset) {
+  return !asset.tipo_ativo || asset.tipo_ativo === 'BTC';
 }
 
 export function BtcDashboardPage() {
@@ -24,6 +28,7 @@ export function BtcDashboardPage() {
     queryKey: queryKeys.btc.dashboard,
     queryFn: getBtcDashboard,
   });
+  const btcAssets = data?.ativos.filter(isBtcAsset) ?? [];
 
   return (
     <section className="page-stack">
@@ -49,7 +54,7 @@ export function BtcDashboardPage() {
             <Card>
               <span className="kpi-label">Total BTC</span>
               <strong className="kpi-value">{formatBtc(data.total_btc)}</strong>
-              <span className="kpi-caption">{data.ativos.length} ativo(s) cadastrado(s)</span>
+              <span className="kpi-caption">{btcAssets.length} ativo(s) BTC cadastrado(s)</span>
             </Card>
             <Card>
               <span className="kpi-label">Valor estimado</span>
@@ -57,9 +62,9 @@ export function BtcDashboardPage() {
               <span className="kpi-caption">Última captura: {formatDate(data.preco_mais_recente?.capturado_em)}</span>
             </Card>
           </div>
-          {data.ativos.length ? (
+          {btcAssets.length ? (
             <div className="responsive-list">
-              {data.ativos.map((asset) => (
+              {btcAssets.map((asset) => (
                 <Card className="list-card" key={asset.id}>
                   <div>
                     <strong>{asset.rotulo}</strong>

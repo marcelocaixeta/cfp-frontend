@@ -49,7 +49,7 @@ const navItems: NavigationItem[] = [
   },
   { to: '/financas/contas-casa', label: 'Contas de casa', icon: HousePlug, parentPath: '/financas' },
   { to: '/financas/emprestimos', label: 'Empréstimos', icon: WalletCards, parentPath: '/financas' },
-  { to: '/btc/ativos', label: 'Ativos BTC', icon: Bitcoin },
+  { to: '/btc/ativos', label: 'Ativos', icon: Bitcoin },
   { to: '/suporte', label: 'Suporte', icon: Headphones },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ];

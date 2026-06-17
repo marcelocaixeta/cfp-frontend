@@ -16,19 +16,40 @@ import type { BtcAsset } from '../types';
 
 const SATOSHIS_PER_BTC = 100_000_000;
 const MAX_BTC_DECIMALS = 10;
+const MAX_MONEY_DECIMALS = 2;
+
+type AssetType = NonNullable<BtcAsset['tipo_ativo']>;
+
+const assetTypeOptions: Array<{ value: AssetType; label: string }> = [
+  { value: 'BTC', label: 'BTC' },
+  { value: 'RENDA_FIXA', label: 'Renda Fixa' },
+  { value: 'RENDA_VARIAVEL', label: 'Renda Variável' },
+];
+
+const assetTypeLabels: Record<AssetType, string> = {
+  BTC: 'BTC',
+  RENDA_FIXA: 'Renda Fixa',
+  RENDA_VARIAVEL: 'Renda Variável',
+};
 
 function getAssetBtc(asset: BtcAsset) {
-  return asset.quantidade_btc ?? asset.quantidade_satoshis / SATOSHIS_PER_BTC;
+  return asset.quantidade_btc ?? Number(asset.quantidade_satoshis ?? 0) / SATOSHIS_PER_BTC;
 }
 
-function parseDecimalInput(value: string) {
+function getAssetType(asset: BtcAsset): AssetType {
+  return asset.tipo_ativo ?? 'BTC';
+}
+
+function parseDecimalInput(value: string, maximumDecimals = MAX_BTC_DECIMALS) {
   const normalizedValue = value.trim().replace(',', '.');
 
   if (!normalizedValue) {
     return undefined;
   }
 
-  if (!/^\d+(\.\d{1,10})?$/.test(normalizedValue)) {
+  const decimalPattern = new RegExp(`^\\d+(\\.\\d{1,${maximumDecimals}})?$`);
+
+  if (!decimalPattern.test(normalizedValue)) {
     return Number.NaN;
   }
 
@@ -38,8 +59,11 @@ function parseDecimalInput(value: string) {
 export function BtcAssetsPage() {
   const queryClient = useQueryClient();
   const [rotulo, setRotulo] = useState('');
+  const [tipoAtivo, setTipoAtivo] = useState<AssetType>('BTC');
   const [quantidadeBtc, setQuantidadeBtc] = useState('');
   const [precoMedioCompra, setPrecoMedioCompra] = useState('');
+  const [valorInvestido, setValorInvestido] = useState('');
+  const [valorAtual, setValorAtual] = useState('');
   const [moeda, setMoeda] = useState('BRL');
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -59,7 +83,9 @@ export function BtcAssetsPage() {
 
     const trimmedLabel = rotulo.trim();
     const parsedBtcAmount = parseDecimalInput(quantidadeBtc);
-    const parsedAveragePrice = parseDecimalInput(precoMedioCompra);
+    const parsedAveragePrice = parseDecimalInput(precoMedioCompra, MAX_MONEY_DECIMALS);
+    const parsedInvestedValue = parseDecimalInput(valorInvestido, MAX_MONEY_DECIMALS);
+    const parsedCurrentValue = parseDecimalInput(valorAtual, MAX_MONEY_DECIMALS);
     const normalizedCurrency = moeda.trim().toUpperCase() || 'BRL';
 
     if (!trimmedLabel) {
@@ -67,14 +93,26 @@ export function BtcAssetsPage() {
       return;
     }
 
-    if (parsedBtcAmount === undefined || !Number.isFinite(parsedBtcAmount) || parsedBtcAmount < 0) {
-      setValidationMessage(`Informe a quantidade em BTC com vírgula ou ponto e até ${MAX_BTC_DECIMALS} casas decimais.`);
-      return;
-    }
+    if (tipoAtivo === 'BTC') {
+      if (parsedBtcAmount === undefined || !Number.isFinite(parsedBtcAmount) || parsedBtcAmount < 0) {
+        setValidationMessage(`Informe a quantidade em BTC com vírgula ou ponto e até ${MAX_BTC_DECIMALS} casas decimais.`);
+        return;
+      }
 
-    if (parsedAveragePrice !== undefined && (!Number.isFinite(parsedAveragePrice) || parsedAveragePrice < 0)) {
-      setValidationMessage(`Informe um preço médio válido, com vírgula ou ponto e até ${MAX_BTC_DECIMALS} casas decimais.`);
-      return;
+      if (parsedAveragePrice !== undefined && (!Number.isFinite(parsedAveragePrice) || parsedAveragePrice < 0)) {
+        setValidationMessage(`Informe um preço médio válido, com vírgula ou ponto e até ${MAX_MONEY_DECIMALS} casas decimais.`);
+        return;
+      }
+    } else {
+      if (parsedInvestedValue === undefined || !Number.isFinite(parsedInvestedValue) || parsedInvestedValue < 0) {
+        setValidationMessage(`Informe o valor investido com vírgula ou ponto e até ${MAX_MONEY_DECIMALS} casas decimais.`);
+        return;
+      }
+
+      if (parsedCurrentValue !== undefined && (!Number.isFinite(parsedCurrentValue) || parsedCurrentValue < 0)) {
+        setValidationMessage(`Informe um valor atual válido, com vírgula ou ponto e até ${MAX_MONEY_DECIMALS} casas decimais.`);
+        return;
+      }
     }
 
     if (!/^[A-Z]{3}$/.test(normalizedCurrency)) {
@@ -85,19 +123,25 @@ export function BtcAssetsPage() {
     setIsSubmitting(true);
 
     try {
-      const parsedSatoshis = Math.round(parsedBtcAmount * SATOSHIS_PER_BTC);
+      const parsedSatoshis = parsedBtcAmount === undefined ? undefined : Math.round(parsedBtcAmount * SATOSHIS_PER_BTC);
 
       await createBtcAsset({
         rotulo: trimmedLabel,
-        quantidade_satoshis: parsedSatoshis,
-        preco_medio_compra: parsedAveragePrice,
+        tipo_ativo: tipoAtivo,
+        quantidade_satoshis: tipoAtivo === 'BTC' ? parsedSatoshis : undefined,
+        preco_medio_compra: tipoAtivo === 'BTC' ? parsedAveragePrice : undefined,
+        valor_investido: tipoAtivo === 'BTC' ? undefined : parsedInvestedValue,
+        valor_atual: tipoAtivo === 'BTC' ? undefined : parsedCurrentValue,
         moeda: normalizedCurrency,
       });
       setRotulo('');
+      setTipoAtivo('BTC');
       setQuantidadeBtc('');
       setPrecoMedioCompra('');
+      setValorInvestido('');
+      setValorAtual('');
       setMoeda('BRL');
-      setSuccessMessage('Ativo BTC cadastrado com sucesso.');
+      setSuccessMessage('Ativo cadastrado com sucesso.');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.btc.assets }),
         queryClient.invalidateQueries({ queryKey: queryKeys.btc.dashboard }),
@@ -112,14 +156,14 @@ export function BtcAssetsPage() {
   return (
     <section className="page-stack">
       <PageHeader
-        title="Ativos BTC"
-        description="Cadastre manualmente seus ativos em BTC e acompanhe as posições vinculadas ao seu usuário."
+        title="Ativos"
+        description="Cadastre ativos financeiros pessoais classificados como BTC, Renda Fixa ou Renda Variável."
       />
       <Card>
         <div className="section-heading">
           <div>
             <span className="kpi-label">Cadastro manual</span>
-            <h2>Novo ativo BTC</h2>
+            <h2>Novo ativo</h2>
           </div>
           <WalletCards size={22} aria-hidden="true" />
         </div>
@@ -143,27 +187,66 @@ export function BtcAssetsPage() {
             />
           </label>
           <label className="field">
-            <span>Quantidade em BTC</span>
-            <input
-              autoComplete="off"
-              inputMode="decimal"
-              onChange={(event) => setQuantidadeBtc(event.target.value)}
-              placeholder="Ex.: 0,01667365"
-              type="text"
-              value={quantidadeBtc}
-            />
+            <span>Tipo</span>
+            <select onChange={(event) => setTipoAtivo(event.target.value as AssetType)} value={tipoAtivo}>
+              {assetTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
-          <label className="field">
-            <span>Preço médio de compra</span>
-            <input
-              autoComplete="off"
-              inputMode="decimal"
-              onChange={(event) => setPrecoMedioCompra(event.target.value)}
-              placeholder="Opcional"
-              type="text"
-              value={precoMedioCompra}
-            />
-          </label>
+          {tipoAtivo === 'BTC' ? (
+            <>
+              <label className="field">
+                <span>Quantidade em BTC</span>
+                <input
+                  autoComplete="off"
+                  inputMode="decimal"
+                  onChange={(event) => setQuantidadeBtc(event.target.value)}
+                  placeholder="Ex.: 0,01667365"
+                  type="text"
+                  value={quantidadeBtc}
+                />
+              </label>
+              <label className="field">
+                <span>Preço médio de compra</span>
+                <input
+                  autoComplete="off"
+                  inputMode="decimal"
+                  onChange={(event) => setPrecoMedioCompra(event.target.value)}
+                  placeholder="Opcional"
+                  type="text"
+                  value={precoMedioCompra}
+                />
+              </label>
+            </>
+          ) : (
+            <>
+              <label className="field">
+                <span>Valor investido</span>
+                <input
+                  autoComplete="off"
+                  inputMode="decimal"
+                  onChange={(event) => setValorInvestido(event.target.value)}
+                  placeholder="Ex.: 1000,00"
+                  type="text"
+                  value={valorInvestido}
+                />
+              </label>
+              <label className="field">
+                <span>Valor atual</span>
+                <input
+                  autoComplete="off"
+                  inputMode="decimal"
+                  onChange={(event) => setValorAtual(event.target.value)}
+                  placeholder="Opcional"
+                  type="text"
+                  value={valorAtual}
+                />
+              </label>
+            </>
+          )}
           <label className="field">
             <span>Moeda</span>
             <input
@@ -187,16 +270,31 @@ export function BtcAssetsPage() {
             <Card className="list-card" key={asset.id}>
               <div>
                 <strong>{asset.rotulo}</strong>
-                <span>{asset.moeda}</span>
+                <span>{assetTypeLabels[getAssetType(asset)]} | {asset.moeda}</span>
               </div>
-              <div>
-                <strong>{formatNumber(asset.quantidade_satoshis, 0)} sats</strong>
-                <span>{formatBtc(getAssetBtc(asset))} BTC</span>
-              </div>
-              <div>
-                <strong>Preço médio</strong>
-                <span>{asset.preco_medio_compra ? formatCurrency(asset.preco_medio_compra, asset.moeda) : '-'}</span>
-              </div>
+              {getAssetType(asset) === 'BTC' ? (
+                <>
+                  <div>
+                    <strong>{formatNumber(asset.quantidade_satoshis, 0)} sats</strong>
+                    <span>{formatBtc(getAssetBtc(asset))} BTC</span>
+                  </div>
+                  <div>
+                    <strong>Preço médio</strong>
+                    <span>{asset.preco_medio_compra ? formatCurrency(asset.preco_medio_compra, asset.moeda) : '-'}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <strong>{formatCurrency(asset.valor_investido, asset.moeda)}</strong>
+                    <span>Valor investido</span>
+                  </div>
+                  <div>
+                    <strong>{asset.valor_atual ? formatCurrency(asset.valor_atual, asset.moeda) : '-'}</strong>
+                    <span>Valor atual</span>
+                  </div>
+                </>
+              )}
             </Card>
           ))}
         </div>
@@ -204,7 +302,7 @@ export function BtcAssetsPage() {
       {data && !data.data.length ? (
         <EmptyState
           title="Sem ativos por enquanto"
-          description="Quando você cadastrar ativos BTC, eles aparecerão aqui."
+          description="Quando você cadastrar ativos financeiros, eles aparecerão aqui."
           action={<Link to="/dashboard">Voltar ao dashboard</Link>}
         />
       ) : null}

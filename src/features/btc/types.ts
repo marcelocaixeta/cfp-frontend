@@ -9,9 +9,12 @@ export type BtcPriceSnapshot = {
 export type BtcAsset = {
   id: number;
   rotulo: string;
-  quantidade_satoshis: number;
+  tipo_ativo?: 'BTC' | 'RENDA_FIXA' | 'RENDA_VARIAVEL';
+  quantidade_satoshis?: number | string | null;
   quantidade_btc?: string;
   preco_medio_compra?: string | null;
+  valor_investido?: string | null;
+  valor_atual?: string | null;
   moeda: string;
 };
 

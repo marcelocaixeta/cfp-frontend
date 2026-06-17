@@ -14,8 +14,11 @@ export async function getBtcAssets() {
 
 export async function createBtcAsset(data: {
   rotulo: string;
-  quantidade_satoshis: number;
+  tipo_ativo: 'BTC' | 'RENDA_FIXA' | 'RENDA_VARIAVEL';
+  quantidade_satoshis?: number;
   preco_medio_compra?: number;
+  valor_investido?: number;
+  valor_atual?: number;
   moeda?: string;
 }) {
   const response = await apiRequest<ApiEnvelope<BtcAsset>>('/btc/assets', {

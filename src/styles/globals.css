@@ -746,7 +746,7 @@ a:hover {
 
 .btc-asset-form {
   display: grid;
-  grid-template-columns: minmax(190px, 1.4fr) minmax(160px, 0.9fr) minmax(160px, 0.9fr) minmax(90px, 0.4fr) auto;
+  grid-template-columns: minmax(190px, 1.4fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) minmax(90px, 0.4fr) auto;
   gap: 12px;
   align-items: end;
 }
