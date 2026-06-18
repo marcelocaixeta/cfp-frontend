@@ -13,6 +13,7 @@ import {
   UserCog,
   UserRound,
   WalletCards,
+  WalletMinimal,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,7 +39,7 @@ const navItems: NavigationItem[] = [
     to: '/financas',
     label: 'Resumo financeiro',
     icon: WalletCards,
-    children: ['/financas/cartoes', '/financas/dividas-cartao', '/financas/contas-casa', '/financas/emprestimos'],
+    children: ['/financas/cartoes', '/financas/dividas-cartao', '/financas/contas-casa', '/financas/emprestimos', '/financas/receitas-mensais'],
   },
   { to: '/financas/cartoes', label: 'Cartões', icon: CreditCard, parentPath: '/financas' },
   {
@@ -49,6 +50,7 @@ const navItems: NavigationItem[] = [
   },
   { to: '/financas/contas-casa', label: 'Contas de casa', icon: HousePlug, parentPath: '/financas' },
   { to: '/financas/emprestimos', label: 'Empréstimos', icon: WalletCards, parentPath: '/financas' },
+  { to: '/financas/receitas-mensais', label: 'Salário e Ganhos', icon: WalletMinimal, parentPath: '/financas' },
   { to: '/btc/ativos', label: 'Ativos', icon: Bitcoin },
   { to: '/suporte', label: 'Suporte', icon: Headphones },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },

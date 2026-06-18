@@ -1,13 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { CalendarDays } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CalendarDays, CheckCircle2 } from 'lucide-react';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
+import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { queryKeys } from '../../../config/queryKeys';
-import { getCurrentWeekDueDates } from '../../finance/api/financeApi';
+import { getCurrentWeekDueDates, markLoanInstallmentAsPaid } from '../../finance/api/financeApi';
 import type { CurrentWeekDueDates } from '../../finance/types';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { formatDate } from '../../../lib/formatting/date';
@@ -21,6 +22,7 @@ function getTotalDueValue(data: CurrentWeekDueDates) {
 }
 
 export function AnalyticsOverviewPage() {
+  const queryClient = useQueryClient();
   const { data, error, isLoading } = useQuery({
     queryKey: queryKeys.analytics.overview,
     queryFn: getAnalyticsOverview,
@@ -33,6 +35,17 @@ export function AnalyticsOverviewPage() {
   } = useQuery({
     queryKey: queryKeys.finance.currentWeekDueDates,
     queryFn: getCurrentWeekDueDates,
+  });
+
+  const payInstallmentMutation = useMutation({
+    mutationFn: (loanInstallmentId: number) => markLoanInstallmentAsPaid(loanInstallmentId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.currentWeekDueDates }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.overview }),
+      ]);
+    },
   });
 
   const hasDueDates =
@@ -80,6 +93,7 @@ export function AnalyticsOverviewPage() {
         </div>
         {isDueDatesLoading ? <Skeleton lines={4} /> : null}
         {dueDatesError ? <Alert error={dueDatesError} /> : null}
+        {payInstallmentMutation.error ? <Alert error={payInstallmentMutation.error} /> : null}
         {dueDates ? (
           <>
             <div className="kpi-grid due-dates-summary">
@@ -152,7 +166,24 @@ export function AnalyticsOverviewPage() {
                             <strong>{formatCurrency(installment.valor)}</strong>
                             <span>Parcela #{installment.numero_parcela}</span>
                           </div>
-                          <StatusBadge status={installment.situacao} />
+                          <div className="due-date-row__actions">
+                            <StatusBadge status={installment.situacao} />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              icon={<CheckCircle2 size={16} aria-hidden="true" />}
+                              disabled={
+                                payInstallmentMutation.isPending &&
+                                payInstallmentMutation.variables === installment.id
+                              }
+                              onClick={() => payInstallmentMutation.mutate(installment.id)}
+                            >
+                              {payInstallmentMutation.isPending &&
+                              payInstallmentMutation.variables === installment.id
+                                ? 'Salvando'
+                                : 'Marcar pago'}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>

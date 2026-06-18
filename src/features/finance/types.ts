@@ -11,6 +11,32 @@ export type FinanceSummary = {
   };
 };
 
+export type FinanceDashboardChartItem = {
+  chave: string;
+  rotulo: string;
+  valor: string;
+};
+
+export type FinanceDashboard = {
+  periodo: {
+    mes: string;
+    inicio: string;
+    fim: string;
+  };
+  totais: {
+    total_a_pagar: string;
+    salario_liquido: string;
+    total_receitas: string;
+    saldo: string;
+  };
+  composicao_pagamentos: FinanceDashboardChartItem[];
+  grafico: {
+    tipo: 'pie';
+    titulo: string;
+    itens: FinanceDashboardChartItem[];
+  };
+};
+
 export type CurrentWeekCreditCardDebtDueDate = {
   id: number;
   tipo: 'divida_cartao_credito';
@@ -103,4 +129,32 @@ export type Loan = {
   primeira_data_vencimento: string;
   situacao: 'active' | 'paid' | 'overdue' | 'canceled';
   installments_count?: number;
+};
+
+export type LoanInstallment = {
+  id: number;
+  emprestimo_id: number;
+  usuario_id: number;
+  numero_parcela: number;
+  data_vencimento: string;
+  valor: string;
+  pago_em?: string | null;
+  situacao: 'pending' | 'paid' | 'overdue' | 'canceled';
+};
+
+export type TipoReceita = 'salary' | 'freelance' | 'investment' | 'other';
+
+export type ReceitaMensal = {
+  id: number;
+  usuario_id: number;
+  categoria_id?: number | null;
+  descricao: string;
+  valor: string;
+  data_recebimento: string;
+  recorrente: boolean;
+  tipo_receita: TipoReceita;
+  observacoes?: string | null;
+  criado_em: string;
+  atualizado_em: string;
+  excluido_em?: string | null;
 };

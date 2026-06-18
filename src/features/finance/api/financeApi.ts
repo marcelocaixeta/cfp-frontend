@@ -1,9 +1,15 @@
 import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
 import type { PaginatedEnvelope } from '../../../lib/api/pagination';
-import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceSummary, HomeBill, HomeBillType, Loan } from '../types';
+import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceDashboard, FinanceSummary, HomeBill, HomeBillType, Loan, LoanInstallment, ReceitaMensal, TipoReceita } from '../types';
 
 export async function getFinanceSummary() {
   const response = await apiRequest<ApiEnvelope<FinanceSummary>>('/finance/summary');
+  return response.data;
+}
+
+export async function getFinanceDashboard(month?: string) {
+  const query = month ? `?mes=${encodeURIComponent(month)}` : '';
+  const response = await apiRequest<ApiEnvelope<FinanceDashboard>>(`/finance/dashboard${query}`);
   return response.data;
 }
 
@@ -47,6 +53,14 @@ export async function createLoan(data: {
   return response.data;
 }
 
+export async function markLoanInstallmentAsPaid(loanInstallmentId: number, data?: { pago_em?: string }) {
+  const response = await apiRequest<ApiEnvelope<LoanInstallment>>(`/finance/loan-installments/${loanInstallmentId}/pay`, {
+    method: 'PATCH',
+    body: data ?? {},
+  });
+  return response.data;
+}
+
 export async function createCreditCard(data: {
   nome: string;
   bandeira?: string;
@@ -85,6 +99,27 @@ export async function createHomeBill(data: {
   data_vencimento: string;
 }) {
   const response = await apiRequest<ApiEnvelope<HomeBill>>('/finance/home-bills', {
+    method: 'POST',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function getReceitasMensais() {
+  const response = await apiRequest<PaginatedEnvelope<ReceitaMensal>>('/finance/receitas-mensais');
+  return response.data;
+}
+
+export async function createReceitaMensal(data: {
+  descricao: string;
+  valor: string;
+  data_recebimento: string;
+  recorrente: boolean;
+  tipo_receita: TipoReceita;
+  categoria_id?: number | null;
+  observacoes?: string | null;
+}) {
+  const response = await apiRequest<ApiEnvelope<ReceitaMensal>>('/finance/receitas-mensais', {
     method: 'POST',
     body: data,
   });
