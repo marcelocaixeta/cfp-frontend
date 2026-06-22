@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { parseCurrency } from '../../../lib/formatting/currency';
@@ -81,8 +82,6 @@ export function HomeBillFormPage() {
 
   async function handleDelete() {
     if (!isEditing) return;
-    const confirmed = window.confirm('Excluir esta conta de casa?');
-    if (!confirmed) return;
 
     setDeleteError(null);
     setIsDeleting(true);
@@ -142,15 +141,23 @@ export function HomeBillFormPage() {
           {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar conta'}
         </Button>
         {isEditing ? (
-          <Button
-            disabled={isDeleting || isSubmitting}
-            icon={<Trash2 size={18} />}
-            onClick={handleDelete}
-            type="button"
+          <ConfirmDialog
+            confirmLabel="Excluir conta"
+            description="Esta conta de casa será excluída. Esta ação não pode ser desfeita."
+            onConfirm={handleDelete}
+            title="Excluir conta de casa?"
+            trigger={(
+              <button
+                className="button button--danger"
+                disabled={isDeleting || isSubmitting}
+                type="button"
+              >
+                <Trash2 size={18} aria-hidden="true" />
+                <span>{isDeleting ? 'Excluindo...' : 'Excluir conta'}</span>
+              </button>
+            )}
             variant="danger"
-          >
-            {isDeleting ? 'Excluindo...' : 'Excluir conta'}
-          </Button>
+          />
         ) : null}
       </form>
     </section>

@@ -13,8 +13,8 @@ import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../../components/ui/EmptyState';
-import { IconButton } from '../../../components/ui/IconButton';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { queryKeys } from '../../../config/queryKeys';
@@ -47,8 +47,6 @@ export function HomeBillsPage() {
   });
 
   function handleDelete(homeBillId: number) {
-    const confirmed = window.confirm('Excluir esta conta de casa?');
-    if (!confirmed) return;
     deleteMutation.mutate(homeBillId);
   }
 
@@ -91,15 +89,24 @@ export function HomeBillsPage() {
                   >
                     <Pencil size={17} aria-hidden="true" />
                   </Link>
-                  <IconButton
-                    className="action-button action-button--delete"
-                    disabled={deleteMutation.isPending}
-                    label={`Excluir ${billName}`}
-                    onClick={() => handleDelete(bill.id)}
-                    type="button"
-                  >
-                    <Trash2 size={17} aria-hidden="true" />
-                  </IconButton>
+                  <ConfirmDialog
+                    confirmLabel="Excluir conta"
+                    description={`A conta "${billName}" será excluída. Esta ação não pode ser desfeita.`}
+                    onConfirm={() => handleDelete(bill.id)}
+                    title="Excluir conta de casa?"
+                    trigger={(
+                      <button
+                        aria-label={`Excluir ${billName}`}
+                        className="icon-button action-button action-button--delete"
+                        disabled={deleteMutation.isPending}
+                        title={`Excluir ${billName}`}
+                        type="button"
+                      >
+                        <Trash2 size={17} aria-hidden="true" />
+                      </button>
+                    )}
+                    variant="danger"
+                  />
                 </div>
               </Card>
             );

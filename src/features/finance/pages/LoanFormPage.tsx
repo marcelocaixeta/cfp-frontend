@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { parseCurrency } from '../../../lib/formatting/currency';
@@ -78,8 +79,6 @@ export function LoanFormPage() {
 
   async function handleDelete() {
     if (!isEditing) return;
-    const confirmed = window.confirm('Excluir este empréstimo?');
-    if (!confirmed) return;
 
     setDeleteError(null);
     setIsDeleting(true);
@@ -140,15 +139,23 @@ export function LoanFormPage() {
           {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar empréstimo'}
         </Button>
         {isEditing ? (
-          <Button
-            disabled={isDeleting || isSubmitting}
-            icon={<Trash2 size={18} />}
-            onClick={handleDelete}
-            type="button"
+          <ConfirmDialog
+            confirmLabel="Excluir empréstimo"
+            description="Este empréstimo será excluído. Esta ação não pode ser desfeita."
+            onConfirm={handleDelete}
+            title="Excluir empréstimo?"
+            trigger={(
+              <button
+                className="button button--danger"
+                disabled={isDeleting || isSubmitting}
+                type="button"
+              >
+                <Trash2 size={18} aria-hidden="true" />
+                <span>{isDeleting ? 'Excluindo...' : 'Excluir empréstimo'}</span>
+              </button>
+            )}
             variant="danger"
-          >
-            {isDeleting ? 'Excluindo...' : 'Excluir empréstimo'}
-          </Button>
+          />
         ) : null}
       </form>
     </section>

@@ -97,6 +97,8 @@ export type CreditCard = {
 
 export type CreditCardDebt = {
   id: number;
+  credit_card_id?: number | null;
+  cartao_credito_id?: number | null;
   descricao: string;
   valor_total: string;
   quantidade_parcelas: number;
@@ -105,6 +107,7 @@ export type CreditCardDebt = {
   primeira_data_vencimento: string;
   situacao: 'pending' | 'paid' | 'overdue' | 'canceled';
   credit_card?: CreditCard | null;
+  cartao_credito?: CreditCard | null;
 };
 
 export type HomeBillType = 'agua' | 'luz' | 'telefone';

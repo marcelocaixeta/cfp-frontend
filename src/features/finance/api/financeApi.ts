@@ -19,6 +19,34 @@ type LoanPayload = {
   primeira_data_vencimento: string;
 };
 
+type CreditCardPayload = {
+  nome: string;
+  bandeira?: string;
+  ultimos_quatro_digitos?: string;
+  limite_valor?: string;
+  dia_fechamento?: number | null;
+  dia_vencimento?: number | null;
+};
+
+type CreditCardDebtPayload = {
+  cartao_credito_id: number;
+  descricao: string;
+  valor_total: string;
+  quantidade_parcelas: number;
+  valor_parcela: string;
+  primeira_data_vencimento: string;
+};
+
+type ReceitaMensalPayload = {
+  descricao: string;
+  valor: string;
+  data_recebimento: string;
+  recorrente: boolean;
+  tipo_receita: TipoReceita;
+  categoria_id?: number | null;
+  observacoes?: string | null;
+};
+
 export async function getFinanceSummary() {
   const response = await apiRequest<ApiEnvelope<FinanceSummary>>('/finance/summary');
   return response.data;
@@ -40,8 +68,18 @@ export async function getCreditCards() {
   return response.data;
 }
 
+export async function getCreditCard(creditCardId: number) {
+  const response = await apiRequest<ApiEnvelope<CreditCard>>(`/finance/credit-cards/${creditCardId}`);
+  return response.data;
+}
+
 export async function getCreditCardDebts() {
   const response = await apiRequest<PaginatedEnvelope<CreditCardDebt>>('/finance/credit-card-debts');
+  return response.data;
+}
+
+export async function getCreditCardDebt(creditCardDebtId: number) {
+  const response = await apiRequest<ApiEnvelope<CreditCardDebt>>(`/finance/credit-card-debts/${creditCardDebtId}`);
   return response.data;
 }
 
@@ -95,14 +133,7 @@ export async function markLoanInstallmentAsPaid(loanInstallmentId: number, data?
   return response.data;
 }
 
-export async function createCreditCard(data: {
-  nome: string;
-  bandeira?: string;
-  ultimos_quatro_digitos?: string;
-  limite_valor?: string;
-  dia_fechamento?: number | null;
-  dia_vencimento?: number | null;
-}) {
+export async function createCreditCard(data: CreditCardPayload) {
   const response = await apiRequest<ApiEnvelope<CreditCard>>('/finance/credit-cards', {
     method: 'POST',
     body: data,
@@ -110,19 +141,40 @@ export async function createCreditCard(data: {
   return response.data;
 }
 
-export async function createCreditCardDebt(data: {
-  credit_card_id: number;
-  descricao: string;
-  valor_total: string;
-  quantidade_parcelas: number;
-  valor_parcela: string;
-  primeira_data_vencimento: string;
-}) {
+export async function updateCreditCard(creditCardId: number, data: CreditCardPayload) {
+  const response = await apiRequest<ApiEnvelope<CreditCard>>(`/finance/credit-cards/${creditCardId}`, {
+    method: 'PATCH',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function deleteCreditCard(creditCardId: number) {
+  await apiRequest<void>(`/finance/credit-cards/${creditCardId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function createCreditCardDebt(data: CreditCardDebtPayload) {
   const response = await apiRequest<ApiEnvelope<CreditCardDebt>>('/finance/credit-card-debts', {
     method: 'POST',
     body: data,
   });
   return response.data;
+}
+
+export async function updateCreditCardDebt(creditCardDebtId: number, data: CreditCardDebtPayload) {
+  const response = await apiRequest<ApiEnvelope<CreditCardDebt>>(`/finance/credit-card-debts/${creditCardDebtId}`, {
+    method: 'PATCH',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function deleteCreditCardDebt(creditCardDebtId: number) {
+  await apiRequest<void>(`/finance/credit-card-debts/${creditCardDebtId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function createHomeBill(data: HomeBillPayload) {
@@ -152,18 +204,29 @@ export async function getReceitasMensais() {
   return response.data;
 }
 
-export async function createReceitaMensal(data: {
-  descricao: string;
-  valor: string;
-  data_recebimento: string;
-  recorrente: boolean;
-  tipo_receita: TipoReceita;
-  categoria_id?: number | null;
-  observacoes?: string | null;
-}) {
+export async function getReceitaMensal(receitaMensalId: number) {
+  const response = await apiRequest<ApiEnvelope<ReceitaMensal>>(`/finance/receitas-mensais/${receitaMensalId}`);
+  return response.data;
+}
+
+export async function createReceitaMensal(data: ReceitaMensalPayload) {
   const response = await apiRequest<ApiEnvelope<ReceitaMensal>>('/finance/receitas-mensais', {
     method: 'POST',
     body: data,
   });
   return response.data;
+}
+
+export async function updateReceitaMensal(receitaMensalId: number, data: ReceitaMensalPayload) {
+  const response = await apiRequest<ApiEnvelope<ReceitaMensal>>(`/finance/receitas-mensais/${receitaMensalId}`, {
+    method: 'PATCH',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function deleteReceitaMensal(receitaMensalId: number) {
+  await apiRequest<void>(`/finance/receitas-mensais/${receitaMensalId}`, {
+    method: 'DELETE',
+  });
 }

@@ -379,6 +379,9 @@ a:hover {
 }
 
 .home-bill-card,
+.credit-card-debt-card,
+.credit-card-card,
+.btc-asset-card,
 .loan-card {
   grid-template-columns: minmax(0, 1.5fr) minmax(160px, 0.8fr) auto auto;
 }
@@ -429,6 +432,74 @@ a:hover {
 .action-button--delete:hover {
   border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
   background: var(--color-danger-soft);
+}
+
+.confirm-dialog__overlay {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  background: rgb(15 23 42 / 0.48);
+  backdrop-filter: blur(2px);
+}
+
+.confirm-dialog__content {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: min(420px, calc(100vw - 32px));
+  gap: 14px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  padding: 22px 52px 22px 22px;
+}
+
+.confirm-dialog__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.confirm-dialog__close:hover {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+}
+
+.confirm-dialog__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.confirm-dialog__description {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .quick-actions {

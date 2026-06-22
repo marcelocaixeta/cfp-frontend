@@ -5,8 +5,8 @@ import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../../components/ui/EmptyState';
-import { IconButton } from '../../../components/ui/IconButton';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { queryKeys } from '../../../config/queryKeys';
@@ -26,8 +26,6 @@ export function LoansPage() {
   });
 
   function handleDelete(loanId: number) {
-    const confirmed = window.confirm('Excluir este empréstimo?');
-    if (!confirmed) return;
     deleteMutation.mutate(loanId);
   }
 
@@ -65,15 +63,24 @@ export function LoansPage() {
                 >
                   <Pencil size={17} aria-hidden="true" />
                 </Link>
-                <IconButton
-                  className="action-button action-button--delete"
-                  disabled={deleteMutation.isPending}
-                  label={`Excluir ${loan.credor_nome}`}
-                  onClick={() => handleDelete(loan.id)}
-                  type="button"
-                >
-                  <Trash2 size={17} aria-hidden="true" />
-                </IconButton>
+                <ConfirmDialog
+                  confirmLabel="Excluir empréstimo"
+                  description={`O empréstimo de "${loan.credor_nome}" será excluído. Esta ação não pode ser desfeita.`}
+                  onConfirm={() => handleDelete(loan.id)}
+                  title="Excluir empréstimo?"
+                  trigger={(
+                    <button
+                      aria-label={`Excluir ${loan.credor_nome}`}
+                      className="icon-button action-button action-button--delete"
+                      disabled={deleteMutation.isPending}
+                      title={`Excluir ${loan.credor_nome}`}
+                      type="button"
+                    >
+                      <Trash2 size={17} aria-hidden="true" />
+                    </button>
+                  )}
+                  variant="danger"
+                />
               </div>
             </Card>
           ))}
