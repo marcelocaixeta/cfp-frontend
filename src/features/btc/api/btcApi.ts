@@ -27,3 +27,9 @@ export async function createBtcAsset(data: {
   });
   return response.data;
 }
+
+export async function deleteBtcAsset(btcAssetId: number) {
+  await apiRequest<void>(`/btc/assets/${btcAssetId}`, {
+    method: 'DELETE',
+  });
+}

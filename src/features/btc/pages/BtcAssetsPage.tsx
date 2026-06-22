@@ -1,17 +1,18 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, WalletCards } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Trash2, WalletCards } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { formatBtc, formatNumber } from '../../../lib/formatting/number';
-import { createBtcAsset, getBtcAssets } from '../api/btcApi';
+import { createBtcAsset, deleteBtcAsset, getBtcAssets } from '../api/btcApi';
 import type { BtcAsset } from '../types';
 
 const SATOSHIS_PER_BTC = 100_000_000;
@@ -74,6 +75,20 @@ export function BtcAssetsPage() {
     queryKey: queryKeys.btc.assets,
     queryFn: getBtcAssets,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteBtcAsset,
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.btc.assets }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.btc.dashboard }),
+    ]),
+  });
+
+  function handleDelete(assetId: number) {
+    setSuccessMessage(null);
+    setSubmitError(null);
+    deleteMutation.mutate(assetId);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -264,10 +279,11 @@ export function BtcAssetsPage() {
       </Card>
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}
+      {deleteMutation.error ? <Alert error={deleteMutation.error} /> : null}
       {data?.data.length ? (
         <div className="responsive-list">
           {data.data.map((asset) => (
-            <Card className="list-card" key={asset.id}>
+            <Card className="list-card btc-asset-card" key={asset.id}>
               <div>
                 <strong>{asset.rotulo}</strong>
                 <span>{assetTypeLabels[getAssetType(asset)]} | {asset.moeda}</span>
@@ -295,6 +311,26 @@ export function BtcAssetsPage() {
                   </div>
                 </>
               )}
+              <div className="list-card__actions" aria-label={`Ações para ${asset.rotulo}`} role="group">
+                <ConfirmDialog
+                  confirmLabel="Excluir ativo"
+                  description={`O ativo "${asset.rotulo}" será excluído. Esta ação não pode ser desfeita.`}
+                  onConfirm={() => handleDelete(asset.id)}
+                  title="Excluir ativo?"
+                  trigger={(
+                    <button
+                      aria-label={`Excluir ${asset.rotulo}`}
+                      className="icon-button action-button action-button--delete"
+                      disabled={deleteMutation.isPending}
+                      title={`Excluir ${asset.rotulo}`}
+                      type="button"
+                    >
+                      <Trash2 size={17} aria-hidden="true" />
+                    </button>
+                  )}
+                  variant="danger"
+                />
+              </div>
             </Card>
           ))}
         </div>
