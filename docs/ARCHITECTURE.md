@@ -290,7 +290,7 @@ Rotas autenticadas:
 | `/financas/dividas-cartao/:id` | `PlaceholderPage` | Preparada para detalhe futuro da divida |
 | `/financas/emprestimos` | `LoansPage` | `GET /finance/loans` |
 | `/financas/emprestimos/novo` | `LoanFormPage` | `POST /finance/loans` |
-| `/financas/emprestimos/:id` | `PlaceholderPage` | Preparada para detalhe futuro do emprestimo |
+| `/financas/emprestimos/:id` | `LoanFormPage` | `GET /finance/loans/{loan}`, `PATCH /finance/loans/{loan}`, `DELETE /finance/loans/{loan}` |
 | `/configuracoes` | `SettingsPage` | `GET /settings` |
 | `/admin/perfis` | `UserProfilesPage` | `GET /users`, `PATCH /users/{user}/profile` |
 | `/admin/suporte` | `AdminSupportTicketsPage` | `GET /support/tickets/all`, `POST /support/tickets/{supportTicket}/messages`, `PATCH /support/tickets/{supportTicket}/resolve` |
@@ -340,6 +340,9 @@ POST   /finance/credit-card-debts
 
 GET    /finance/loans
 POST   /finance/loans
+GET    /finance/loans/{loan}
+PATCH  /finance/loans/{loan}
+DELETE /finance/loans/{loan}
 
 GET    /btc/dashboard
 GET    /btc/assets
@@ -477,10 +480,10 @@ Componentes:
 
 Responsabilidades:
 
-- Listar chamados do usuario.
+- Listar chamados do usuario com respostas do suporte.
 - Criar chamados.
 - Preparar detalhe futuro do chamado.
-- Permitir que administradores visualizem todos os chamados abertos.
+- Permitir que administradores visualizem todos os chamados abertos com a mensagem inicial.
 - Permitir que administradores respondam e resolvam chamados.
 
 Paginas:

@@ -23,6 +23,7 @@ function AdminTicketCard({ ticket }: { ticket: SupportTicket }) {
 
   const isResolved = ticket.situacao === 'resolved' || ticket.situacao === 'closed';
   const trimmedMessage = mensagem.trim();
+  const ticketDescription = ticket.messages?.[0]?.mensagem;
 
   async function refreshTickets() {
     await Promise.all([
@@ -61,8 +62,9 @@ function AdminTicketCard({ ticket }: { ticket: SupportTicket }) {
     setIsResolving(true);
 
     try {
-      await resolveSupportTicket(ticket.id);
-      setSuccessMessage('Chamado marcado como resolvido.');
+      await resolveSupportTicket(ticket.id, trimmedMessage || undefined);
+      setMensagem('');
+      setSuccessMessage(trimmedMessage ? 'Resposta enviada e chamado resolvido.' : 'Chamado marcado como resolvido.');
       await refreshTickets();
     } catch (err) {
       setError(err);
@@ -94,6 +96,11 @@ function AdminTicketCard({ ticket }: { ticket: SupportTicket }) {
         </div>
       </dl>
 
+      <div className="support-admin-card__description">
+        <span>Descrição do chamado</span>
+        <p>{ticketDescription ?? 'Nenhuma mensagem inicial foi enviada neste chamado.'}</p>
+      </div>
+
       {error ? <Alert error={error} /> : null}
       {successMessage ? (
         <div className="success-message" role="status">
@@ -122,12 +129,12 @@ function AdminTicketCard({ ticket }: { ticket: SupportTicket }) {
             {isSendingMessage ? 'Enviando...' : 'Responder'}
           </Button>
           <Button
-            disabled={isResolved || isResolving}
+            disabled={isResolved || isResolving || isSendingMessage}
             icon={<CheckCircle2 size={18} />}
             onClick={handleResolve}
             type="button"
           >
-            {isResolving ? 'Resolvendo...' : 'Resolver chamado'}
+            {isResolving ? 'Resolvendo...' : trimmedMessage ? 'Responder e resolver' : 'Resolver chamado'}
           </Button>
         </div>
       </form>

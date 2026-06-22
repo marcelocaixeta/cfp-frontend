@@ -378,6 +378,11 @@ a:hover {
   gap: 16px;
 }
 
+.home-bill-card,
+.loan-card {
+  grid-template-columns: minmax(0, 1.5fr) minmax(160px, 0.8fr) auto auto;
+}
+
 .list-card div {
   display: grid;
   min-width: 0;
@@ -393,6 +398,37 @@ a:hover {
 .list-card span {
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.list-card .list-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.home-bill-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.action-button--edit {
+  color: var(--color-primary);
+}
+
+.action-button--delete {
+  color: var(--color-danger);
+}
+
+.action-button--delete:hover {
+  border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
+  background: var(--color-danger-soft);
 }
 
 .quick-actions {
@@ -695,6 +731,27 @@ a:hover {
   gap: 16px;
 }
 
+.support-ticket-card__reply {
+  grid-column: 1 / -1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: 12px;
+}
+
+.support-ticket-card__reply span {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.support-ticket-card__reply p {
+  margin: 6px 0 0;
+  color: var(--color-text);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 .support-admin-card__summary {
   display: flex;
   align-items: flex-start;
@@ -746,6 +803,28 @@ a:hover {
   margin: 0;
   font-weight: 800;
   text-align: right;
+}
+
+.support-admin-card__description {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: 12px;
+}
+
+.support-admin-card__description span {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.support-admin-card__description p {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.55;
+  white-space: pre-wrap;
 }
 
 .segmented-control {
@@ -956,6 +1035,10 @@ a:hover {
   .list-card {
     grid-template-columns: 1fr;
     align-items: start;
+  }
+
+  .list-card .list-card__actions {
+    justify-content: flex-start;
   }
 
   .btc-asset-form {

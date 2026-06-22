@@ -34,9 +34,10 @@ export async function createSupportTicketMessage(ticketId: number, mensagem: str
   return response.data;
 }
 
-export async function resolveSupportTicket(ticketId: number) {
+export async function resolveSupportTicket(ticketId: number, mensagem?: string) {
   const response = await apiRequest<ApiEnvelope<SupportTicket>>(`/support/tickets/${ticketId}/resolve`, {
     method: 'PATCH',
+    body: mensagem ? { mensagem } : undefined,
   });
   return response.data;
 }

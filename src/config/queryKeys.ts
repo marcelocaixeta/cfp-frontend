@@ -19,7 +19,9 @@ export const queryKeys = {
     creditCards: ['finance', 'creditCards'] as const,
     creditCardDebts: ['finance', 'creditCardDebts'] as const,
     homeBills: ['finance', 'homeBills'] as const,
+    homeBill: (id: number) => ['finance', 'homeBills', id] as const,
     loans: ['finance', 'loans'] as const,
+    loan: (id: number) => ['finance', 'loans', id] as const,
     receitasMensais: ['finance', 'receitasMensais'] as const,
   },
   settings: {

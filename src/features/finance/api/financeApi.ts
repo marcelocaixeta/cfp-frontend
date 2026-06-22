@@ -2,6 +2,23 @@ import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
 import type { PaginatedEnvelope } from '../../../lib/api/pagination';
 import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceDashboard, FinanceSummary, HomeBill, HomeBillType, Loan, LoanInstallment, ReceitaMensal, TipoReceita } from '../types';
 
+type HomeBillPayload = {
+  tipo: HomeBillType;
+  fornecedor_nome: string;
+  descricao: string;
+  valor: string;
+  data_vencimento: string;
+};
+
+type LoanPayload = {
+  credor_nome: string;
+  descricao?: string;
+  valor_principal: string;
+  quantidade_parcelas: number;
+  valor_parcela: string;
+  primeira_data_vencimento: string;
+};
+
 export async function getFinanceSummary() {
   const response = await apiRequest<ApiEnvelope<FinanceSummary>>('/finance/summary');
   return response.data;
@@ -33,24 +50,41 @@ export async function getHomeBills() {
   return response.data;
 }
 
+export async function getHomeBill(homeBillId: number) {
+  const response = await apiRequest<ApiEnvelope<HomeBill>>(`/finance/home-bills/${homeBillId}`);
+  return response.data;
+}
+
 export async function getLoans() {
   const response = await apiRequest<PaginatedEnvelope<Loan>>('/finance/loans');
   return response.data;
 }
 
-export async function createLoan(data: {
-  credor_nome: string;
-  descricao?: string;
-  valor_principal: string;
-  quantidade_parcelas: number;
-  valor_parcela: string;
-  primeira_data_vencimento: string;
-}) {
+export async function getLoan(loanId: number) {
+  const response = await apiRequest<ApiEnvelope<Loan>>(`/finance/loans/${loanId}`);
+  return response.data;
+}
+
+export async function createLoan(data: LoanPayload) {
   const response = await apiRequest<ApiEnvelope<Loan>>('/finance/loans', {
     method: 'POST',
     body: data,
   });
   return response.data;
+}
+
+export async function updateLoan(loanId: number, data: LoanPayload) {
+  const response = await apiRequest<ApiEnvelope<Loan>>(`/finance/loans/${loanId}`, {
+    method: 'PATCH',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function deleteLoan(loanId: number) {
+  await apiRequest<void>(`/finance/loans/${loanId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function markLoanInstallmentAsPaid(loanInstallmentId: number, data?: { pago_em?: string }) {
@@ -91,18 +125,26 @@ export async function createCreditCardDebt(data: {
   return response.data;
 }
 
-export async function createHomeBill(data: {
-  tipo: HomeBillType;
-  fornecedor_nome: string;
-  descricao: string;
-  valor: string;
-  data_vencimento: string;
-}) {
+export async function createHomeBill(data: HomeBillPayload) {
   const response = await apiRequest<ApiEnvelope<HomeBill>>('/finance/home-bills', {
     method: 'POST',
     body: data,
   });
   return response.data;
+}
+
+export async function updateHomeBill(homeBillId: number, data: HomeBillPayload) {
+  const response = await apiRequest<ApiEnvelope<HomeBill>>(`/finance/home-bills/${homeBillId}`, {
+    method: 'PATCH',
+    body: data,
+  });
+  return response.data;
+}
+
+export async function deleteHomeBill(homeBillId: number) {
+  await apiRequest<void>(`/finance/home-bills/${homeBillId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function getReceitasMensais() {

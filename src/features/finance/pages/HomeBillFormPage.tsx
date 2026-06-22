@@ -1,16 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
-import { ReceiptText } from 'lucide-react';
-import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ReceiptText, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { z } from 'zod';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { parseCurrency } from '../../../lib/formatting/currency';
-import { createHomeBill } from '../api/financeApi';
+import { createHomeBill, deleteHomeBill, getHomeBill, updateHomeBill } from '../api/financeApi';
 
 const schema = z.object({
   tipo: z.enum(['agua', 'luz', 'telefone'], 'Selecione o tipo da conta.'),
@@ -24,13 +25,25 @@ type HomeBillFormData = z.infer<typeof schema>;
 
 export function HomeBillFormPage() {
   const [error, setError] = useState<unknown>(null);
+  const [deleteError, setDeleteError] = useState<unknown>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
+  const params = useParams();
   const queryClient = useQueryClient();
+  const homeBillId = Number(params.id);
+  const isEditing = params.id !== undefined && Number.isInteger(homeBillId);
+
+  const homeBillQuery = useQuery({
+    queryKey: queryKeys.finance.homeBill(isEditing ? homeBillId : 0),
+    queryFn: () => getHomeBill(homeBillId as number),
+    enabled: isEditing,
+  });
 
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
+    reset,
   } = useForm<HomeBillFormData>({
     defaultValues: {
       tipo: 'agua',
@@ -38,10 +51,27 @@ export function HomeBillFormPage() {
     resolver: zodResolver(schema),
   });
 
+  useEffect(() => {
+    if (!isEditing || !homeBillQuery.data) return;
+
+    reset({
+      tipo: homeBillQuery.data.tipo,
+      fornecedor_nome: homeBillQuery.data.fornecedor_nome ?? '',
+      descricao: homeBillQuery.data.descricao ?? '',
+      valor: homeBillQuery.data.valor ?? '',
+      data_vencimento: homeBillQuery.data.data_vencimento?.slice(0, 10) ?? '',
+    });
+  }, [homeBillQuery.data, isEditing, reset]);
+
   async function onSubmit(data: HomeBillFormData) {
     setError(null);
     try {
-      await createHomeBill(data);
+      if (isEditing) {
+        await updateHomeBill(homeBillId, data);
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.homeBill(homeBillId) });
+      } else {
+        await createHomeBill(data);
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.finance.homeBills });
       navigate('/financas/contas-casa');
     } catch (err) {
@@ -49,13 +79,35 @@ export function HomeBillFormPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!isEditing) return;
+    const confirmed = window.confirm('Excluir esta conta de casa?');
+    if (!confirmed) return;
+
+    setDeleteError(null);
+    setIsDeleting(true);
+    try {
+      await deleteHomeBill(homeBillId);
+      queryClient.invalidateQueries({ queryKey: queryKeys.finance.homeBills });
+      queryClient.removeQueries({ queryKey: queryKeys.finance.homeBill(homeBillId) });
+      navigate('/financas/contas-casa');
+    } catch (err) {
+      setDeleteError(err);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <section className="page-stack">
       <PageHeader
-        title="Nova conta de casa"
-        description="Cadastre uma conta de água, luz ou telefone."
+        title={isEditing ? 'Editar conta de casa' : 'Nova conta de casa'}
+        description={isEditing ? 'Atualize os dados da conta.' : 'Cadastre uma conta de água, luz ou telefone.'}
       />
+      {homeBillQuery.isLoading ? <Skeleton lines={4} /> : null}
+      {homeBillQuery.error ? <Alert error={homeBillQuery.error} /> : null}
       {error ? <Alert error={error} /> : null}
+      {deleteError ? <Alert error={deleteError} /> : null}
       <form className="form" onSubmit={handleSubmit(onSubmit)}>
         <label className="field">
           <span>Tipo de conta</span>
@@ -87,8 +139,19 @@ export function HomeBillFormPage() {
           {errors.data_vencimento ? <small>{errors.data_vencimento.message}</small> : null}
         </label>
         <Button disabled={isSubmitting} icon={<ReceiptText size={18} />} type="submit">
-          {isSubmitting ? 'Salvando...' : 'Salvar conta'}
+          {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar conta'}
         </Button>
+        {isEditing ? (
+          <Button
+            disabled={isDeleting || isSubmitting}
+            icon={<Trash2 size={18} />}
+            onClick={handleDelete}
+            type="button"
+            variant="danger"
+          >
+            {isDeleting ? 'Excluindo...' : 'Excluir conta'}
+          </Button>
+        ) : null}
       </form>
     </section>
   );

@@ -67,20 +67,14 @@ export const router = createBrowserRouter([
           { path: '/financas/dividas-cartao/nova', element: <CreditCardDebtFormPage /> },
           { path: '/financas/contas-casa', element: <HomeBillsPage /> },
           { path: '/financas/contas-casa/nova', element: <HomeBillFormPage /> },
-          {
-            path: '/financas/contas-casa/:id',
-            element: <PlaceholderPage title="Detalhe da conta de casa" />,
-          },
+          { path: '/financas/contas-casa/:id', element: <HomeBillFormPage /> },
           {
             path: '/financas/dividas-cartao/:id',
             element: <PlaceholderPage title="Detalhe da dívida" />,
           },
           { path: '/financas/emprestimos', element: <LoansPage /> },
           { path: '/financas/emprestimos/novo', element: <LoanFormPage /> },
-          {
-            path: '/financas/emprestimos/:id',
-            element: <PlaceholderPage title="Detalhe do empréstimo" />,
-          },
+          { path: '/financas/emprestimos/:id', element: <LoanFormPage /> },
           { path: '/financas/receitas-mensais', element: <ReceitasMensaisPage /> },
           { path: '/financas/receitas-mensais/nova', element: <ReceitaMensalFormPage /> },
           { path: '/configuracoes', element: <SettingsPage /> },

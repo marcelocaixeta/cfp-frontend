@@ -10,6 +10,12 @@ import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatDate } from '../../../lib/formatting/date';
 import { getSupportTickets } from '../api/supportApi';
+import type { SupportTicket } from '../types';
+
+function getLatestSupportReply(ticket: SupportTicket) {
+  const supportMessages = ticket.messages?.filter((message) => message.user?.perfil === 'admin') ?? [];
+  return supportMessages[supportMessages.length - 1];
+}
 
 export function SupportTicketsPage() {
   const navigate = useNavigate();
@@ -30,24 +36,32 @@ export function SupportTicketsPage() {
       {error ? <Alert error={error} /> : null}
       {data?.data.length ? (
         <div className="responsive-list">
-          {data.data.map((ticket) => (
-            <Card className="list-card" key={ticket.id}>
-              <div>
-                <strong>{ticket.assunto}</strong>
-                <span>
-                  {ticket.categoria ?? 'Geral'} · {ticket.messages_count ?? 0} mensagem(ns)
-                </span>
-              </div>
-              <div>
-                <strong>Prioridade</strong>
-                <span>{ticket.prioridade}</span>
-              </div>
-              <div>
-                <span>{formatDate(ticket.criado_em)}</span>
-                <StatusBadge status={ticket.situacao} />
-              </div>
-            </Card>
-          ))}
+          {data.data.map((ticket) => {
+            const supportReply = getLatestSupportReply(ticket);
+
+            return (
+              <Card className="list-card support-ticket-card" key={ticket.id}>
+                <div>
+                  <strong>{ticket.assunto}</strong>
+                  <span>
+                    {ticket.categoria ?? 'Geral'} · {ticket.messages_count ?? 0} mensagem(ns)
+                  </span>
+                </div>
+                <div>
+                  <strong>Prioridade</strong>
+                  <span>{ticket.prioridade}</span>
+                </div>
+                <div>
+                  <span>{formatDate(ticket.criado_em)}</span>
+                  <StatusBadge status={ticket.situacao} />
+                </div>
+                <div className="support-ticket-card__reply">
+                  <span>Resposta do suporte</span>
+                  <p>{supportReply?.mensagem ?? 'Aguardando resposta do suporte.'}</p>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       ) : null}
       {data && !data.data.length ? (
