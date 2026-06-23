@@ -117,30 +117,6 @@ export function AnalyticsOverviewPage() {
       />
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}
-      {data ? (
-        <div className="kpi-grid">
-          <Card>
-            <span className="kpi-label">Dívidas de cartão</span>
-            <strong className="kpi-value">{data.quantidade_dividas_cartao_credito}</strong>
-            <span className="kpi-caption">Registros cadastrados</span>
-          </Card>
-          <Card>
-            <span className="kpi-label">Empréstimos ativos</span>
-            <strong className="kpi-value">{data.quantidade_emprestimos_ativos}</strong>
-            <span className="kpi-caption">Contratos em andamento</span>
-          </Card>
-          <Card>
-            <span className="kpi-label">Ativos BTC</span>
-            <strong className="kpi-value">{data.quantidade_ativos_btc}</strong>
-            <span className="kpi-caption">Itens acompanhados</span>
-          </Card>
-          <Card>
-            <span className="kpi-label">Chamados abertos</span>
-            <strong className="kpi-value">{data.quantidade_chamados_suporte_abertos}</strong>
-            <span className="kpi-caption">Pendências de suporte</span>
-          </Card>
-        </div>
-      ) : null}
       <Card>
         <div className="section-heading">
           <div>
@@ -325,6 +301,30 @@ export function AnalyticsOverviewPage() {
           </>
         ) : null}
       </Card>
+      {data ? (
+        <div className="kpi-grid">
+          <Card>
+            <span className="kpi-label">Dívidas de cartão</span>
+            <strong className="kpi-value">{data.quantidade_dividas_cartao_credito}</strong>
+            <span className="kpi-caption">Registros cadastrados</span>
+          </Card>
+          <Card>
+            <span className="kpi-label">Empréstimos ativos</span>
+            <strong className="kpi-value">{data.quantidade_emprestimos_ativos}</strong>
+            <span className="kpi-caption">Contratos em andamento</span>
+          </Card>
+          <Card>
+            <span className="kpi-label">Ativos BTC</span>
+            <strong className="kpi-value">{data.quantidade_ativos_btc}</strong>
+            <span className="kpi-caption">Itens acompanhados</span>
+          </Card>
+          <Card>
+            <span className="kpi-label">Chamados abertos</span>
+            <strong className="kpi-value">{data.quantidade_chamados_suporte_abertos}</strong>
+            <span className="kpi-caption">Pendências de suporte</span>
+          </Card>
+        </div>
+      ) : null}
     </section>
   );
 }
