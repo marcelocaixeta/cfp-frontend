@@ -31,12 +31,16 @@ export function FinanceDashboardPage() {
     queryFn: () => getFinanceDashboard(month),
   });
   const chartData = useMemo(() => toChartData(data?.grafico.itens ?? []), [data]);
+  const chartColorsByKey = useMemo(
+    () => new Map(chartData.map((item, index) => [item.chave, CHART_COLORS[index % CHART_COLORS.length]])),
+    [chartData],
+  );
 
   return (
     <section className="page-stack">
       <PageHeader
-        title="Controle financeiro mensal"
-        description="Acompanhe o total a pagar, salário líquido, saldo mensal e composição dos pagamentos."
+        title="Controle dos pagamentos do mês"
+        description="Acompanhe o total a pagar, salário líquido e composição dos pagamentos."
         action={
           <label className="month-filter">
             <span>Mês</span>
@@ -52,24 +56,6 @@ export function FinanceDashboardPage() {
       {error ? <Alert error={error} /> : null}
       {data ? (
         <>
-          <div className="kpi-grid finance-dashboard__totals">
-            <Card className="kpi-card--danger">
-              <span className="kpi-label">Total a pagar</span>
-              <strong className="kpi-value">{formatCurrency(data.totais.total_a_pagar)}</strong>
-              <span className="kpi-caption">Cartões, contas e parcelas do mês</span>
-            </Card>
-            <Card className="kpi-card--info">
-              <span className="kpi-label">Salário líquido</span>
-              <strong className="kpi-value">{formatCurrency(data.totais.salario_liquido)}</strong>
-              <span className="kpi-caption">Receitas do tipo salário</span>
-            </Card>
-            <Card className={Number(data.totais.saldo) >= 0 ? 'kpi-card--success' : 'kpi-card--danger'}>
-              <span className="kpi-label">Saldo</span>
-              <strong className="kpi-value">{formatCurrency(data.totais.saldo)}</strong>
-              <span className="kpi-caption">Receitas totais menos pagamentos</span>
-            </Card>
-          </div>
-
           <div className="finance-dashboard">
             <Card className="finance-dashboard__chart-card">
               <div className="section-heading">
@@ -102,12 +88,28 @@ export function FinanceDashboardPage() {
               <div className="breakdown-list">
                 {data.composicao_pagamentos.map((item, index) => (
                   <div className="breakdown-row" key={item.chave}>
-                    <span className="breakdown-row__marker" style={{ background: CHART_COLORS[(index + 1) % CHART_COLORS.length] }} />
+                    <span
+                      className="breakdown-row__marker"
+                      style={{ background: chartColorsByKey.get(item.chave) ?? CHART_COLORS[(index + 1) % CHART_COLORS.length] }}
+                    />
                     <span>{item.rotulo}</span>
                     <strong>{formatCurrency(item.valor)}</strong>
                   </div>
                 ))}
               </div>
+            </Card>
+          </div>
+
+          <div className="kpi-grid finance-dashboard__totals">
+            <Card className="kpi-card--danger">
+              <span className="kpi-label">Total a pagar</span>
+              <strong className="kpi-value">{formatCurrency(data.totais.total_a_pagar)}</strong>
+              <span className="kpi-caption">Cartões, contas e parcelas em aberto</span>
+            </Card>
+            <Card className="kpi-card--info">
+              <span className="kpi-label">Salário líquido</span>
+              <strong className="kpi-value">{formatCurrency(data.totais.salario_liquido)}</strong>
+              <span className="kpi-caption">Receitas do tipo salário</span>
             </Card>
           </div>
         </>

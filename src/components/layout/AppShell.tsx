@@ -33,14 +33,14 @@ type NavigationItem = {
 };
 
 const navItems: NavigationItem[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/analises', label: 'Análises', icon: BarChart3 },
   {
     to: '/financas',
-    label: 'Resumo financeiro',
+    label: 'Gastos mensais',
     icon: WalletCards,
     children: ['/financas/cartoes', '/financas/dividas-cartao', '/financas/contas-casa', '/financas/emprestimos', '/financas/receitas-mensais'],
   },
+  { to: '/analises', label: 'Análises', icon: BarChart3 },
+  { to: '/dashboard', label: 'Controle de pagamentos', icon: LayoutDashboard },
   { to: '/financas/cartoes', label: 'Cartões', icon: CreditCard, parentPath: '/financas' },
   {
     to: '/financas/dividas-cartao',

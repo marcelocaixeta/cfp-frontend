@@ -1,6 +1,18 @@
 import { apiRequest, type ApiEnvelope } from '../../../lib/api/apiClient';
 import type { PaginatedEnvelope } from '../../../lib/api/pagination';
-import type { CreditCard, CreditCardDebt, CurrentWeekDueDates, FinanceDashboard, FinanceSummary, HomeBill, HomeBillType, Loan, LoanInstallment, ReceitaMensal, TipoReceita } from '../types';
+import type {
+  CreditCard,
+  CreditCardDebt,
+  FinanceDashboard,
+  FinanceDueDates,
+  FinanceSummary,
+  HomeBill,
+  HomeBillType,
+  Loan,
+  LoanInstallment,
+  ReceitaMensal,
+  TipoReceita,
+} from '../types';
 
 type HomeBillPayload = {
   tipo: HomeBillType;
@@ -47,8 +59,30 @@ type ReceitaMensalPayload = {
   observacoes?: string | null;
 };
 
-export async function getFinanceSummary() {
-  const response = await apiRequest<ApiEnvelope<FinanceSummary>>('/finance/summary');
+type FinanceDueDatesResponse = Omit<FinanceDueDates, 'contas_casa' | 'totais'> & {
+  contas_casa?: FinanceDueDates['contas_casa'];
+  totais: Omit<FinanceDueDates['totais'], 'contas_casa'> & {
+    contas_casa?: FinanceDueDates['totais']['contas_casa'];
+  };
+};
+
+function normalizeFinanceDueDates(data: FinanceDueDatesResponse): FinanceDueDates {
+  return {
+    ...data,
+    contas_casa: data.contas_casa ?? [],
+    totais: {
+      ...data.totais,
+      contas_casa: data.totais.contas_casa ?? {
+        count: 0,
+        valor: '0',
+      },
+    },
+  };
+}
+
+export async function getFinanceSummary(month?: string) {
+  const query = month ? `?mes=${encodeURIComponent(month)}` : '';
+  const response = await apiRequest<ApiEnvelope<FinanceSummary>>(`/finance/summary${query}`);
   return response.data;
 }
 
@@ -58,9 +92,10 @@ export async function getFinanceDashboard(month?: string) {
   return response.data;
 }
 
-export async function getCurrentWeekDueDates() {
-  const response = await apiRequest<ApiEnvelope<CurrentWeekDueDates>>('/finance/current-week-due-dates');
-  return response.data;
+export async function getFinanceDueDates(month?: string) {
+  const query = month ? `?mes=${encodeURIComponent(month)}` : '';
+  const response = await apiRequest<ApiEnvelope<FinanceDueDatesResponse>>(`/finance/current-week-due-dates${query}`);
+  return normalizeFinanceDueDates(response.data);
 }
 
 export async function getCreditCards() {
@@ -83,6 +118,16 @@ export async function getCreditCardDebt(creditCardDebtId: number) {
   return response.data;
 }
 
+export async function markCreditCardDebtAsPaid(creditCardDebtId: number) {
+  const response = await apiRequest<ApiEnvelope<CreditCardDebt>>(`/finance/credit-card-debts/${creditCardDebtId}`, {
+    method: 'PATCH',
+    body: {
+      situacao: 'paid',
+    },
+  });
+  return response.data;
+}
+
 export async function getHomeBills() {
   const response = await apiRequest<PaginatedEnvelope<HomeBill>>('/finance/home-bills');
   return response.data;
@@ -90,6 +135,16 @@ export async function getHomeBills() {
 
 export async function getHomeBill(homeBillId: number) {
   const response = await apiRequest<ApiEnvelope<HomeBill>>(`/finance/home-bills/${homeBillId}`);
+  return response.data;
+}
+
+export async function markHomeBillAsPaid(homeBillId: number) {
+  const response = await apiRequest<ApiEnvelope<HomeBill>>(`/finance/home-bills/${homeBillId}`, {
+    method: 'PATCH',
+    body: {
+      situacao: 'paid',
+    },
+  });
   return response.data;
 }
 

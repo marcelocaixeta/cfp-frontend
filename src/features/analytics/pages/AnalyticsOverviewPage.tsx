@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, CheckCircle2 } from 'lucide-react';
 import { PageHeader } from '../../../components/layout/PageHeader';
@@ -8,21 +9,39 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { queryKeys } from '../../../config/queryKeys';
-import { getCurrentWeekDueDates, markLoanInstallmentAsPaid } from '../../finance/api/financeApi';
-import type { CurrentWeekDueDates } from '../../finance/types';
+import {
+  getFinanceDueDates,
+  markCreditCardDebtAsPaid,
+  markHomeBillAsPaid,
+  markLoanInstallmentAsPaid,
+} from '../../finance/api/financeApi';
+import type { FinanceDueDates, HomeBillType } from '../../finance/types';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { formatDate } from '../../../lib/formatting/date';
 import { getAnalyticsOverview } from '../api/analyticsApi';
 
-function getTotalDueValue(data: CurrentWeekDueDates) {
+const homeBillTypeLabels: Record<HomeBillType, string> = {
+  agua: 'Água',
+  luz: 'Luz',
+  telefone: 'Telefone',
+};
+
+function getCurrentMonth() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getTotalDueValue(data: FinanceDueDates) {
   return (
     Number(data.totais.dividas_cartao_credito.valor ?? 0) +
+    Number(data.totais.contas_casa.valor ?? 0) +
     Number(data.totais.parcelas_emprestimos.valor ?? 0)
   );
 }
 
 export function AnalyticsOverviewPage() {
   const queryClient = useQueryClient();
+  const [month, setMonth] = useState(getCurrentMonth);
   const { data, error, isLoading } = useQuery({
     queryKey: queryKeys.analytics.overview,
     queryFn: getAnalyticsOverview,
@@ -33,29 +52,68 @@ export function AnalyticsOverviewPage() {
     error: dueDatesError,
     isLoading: isDueDatesLoading,
   } = useQuery({
-    queryKey: queryKeys.finance.currentWeekDueDates,
-    queryFn: getCurrentWeekDueDates,
+    queryKey: queryKeys.finance.dueDates(month),
+    queryFn: () => getFinanceDueDates(month),
   });
 
   const payInstallmentMutation = useMutation({
     mutationFn: (loanInstallmentId: number) => markLoanInstallmentAsPaid(loanInstallmentId),
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.finance.currentWeekDueDates }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.finance.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.dueDatesRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.summaryRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.dashboardRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.overview }),
+      ]);
+    },
+  });
+
+  const payCreditCardDebtMutation = useMutation({
+    mutationFn: (creditCardDebtId: number) => markCreditCardDebtAsPaid(creditCardDebtId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.dueDatesRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.summaryRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.creditCardDebts }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.dashboardRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.overview }),
+      ]);
+    },
+  });
+
+  const payHomeBillMutation = useMutation({
+    mutationFn: (homeBillId: number) => markHomeBillAsPaid(homeBillId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.dueDatesRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.summaryRoot }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.homeBills }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.finance.dashboardRoot }),
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.overview }),
       ]);
     },
   });
 
   const hasDueDates =
-    Boolean(dueDates?.dividas_cartao_credito.length) || Boolean(dueDates?.parcelas_emprestimos.length);
+    Boolean(dueDates?.dividas_cartao_credito.length) ||
+    Boolean(dueDates?.contas_casa.length) ||
+    Boolean(dueDates?.parcelas_emprestimos.length);
 
   return (
     <section className="page-stack">
       <PageHeader
         title="Análises"
         description="Indicadores rápidos sobre finanças, BTC e suporte."
+        action={
+          <label className="month-filter">
+            <span>Mês</span>
+            <input
+              type="month"
+              value={month}
+              onChange={(event) => setMonth(event.target.value || getCurrentMonth())}
+            />
+          </label>
+        }
       />
       {isLoading ? <Skeleton lines={5} /> : null}
       {error ? <Alert error={error} /> : null}
@@ -86,13 +144,15 @@ export function AnalyticsOverviewPage() {
       <Card>
         <div className="section-heading">
           <div>
-            <span className="kpi-label">Semana corrente</span>
-            <h2>Vencimentos da semana</h2>
+            <span className="kpi-label">Mês selecionado</span>
+            <h2>Vencimentos do mês</h2>
           </div>
           <CalendarDays size={22} aria-hidden="true" />
         </div>
         {isDueDatesLoading ? <Skeleton lines={4} /> : null}
         {dueDatesError ? <Alert error={dueDatesError} /> : null}
+        {payCreditCardDebtMutation.error ? <Alert error={payCreditCardDebtMutation.error} /> : null}
+        {payHomeBillMutation.error ? <Alert error={payHomeBillMutation.error} /> : null}
         {payInstallmentMutation.error ? <Alert error={payInstallmentMutation.error} /> : null}
         {dueDates ? (
           <>
@@ -105,19 +165,23 @@ export function AnalyticsOverviewPage() {
                 <span className="kpi-caption">Vencimentos pendentes ou vencidos</span>
               </div>
               <div className="btc-balance-metric">
-                <span className="kpi-label">Total da semana</span>
+                <span className="kpi-label">Total do mês</span>
                 <strong className="kpi-value">{formatCurrency(getTotalDueValue(dueDates))}</strong>
                 <span className="kpi-caption">
-                  {dueDates.totais.dividas_cartao_credito.count + dueDates.totais.parcelas_emprestimos.count} item(ns)
+                  {dueDates.totais.dividas_cartao_credito.count +
+                    dueDates.totais.contas_casa.count +
+                    dueDates.totais.parcelas_emprestimos.count} item(ns)
                 </span>
               </div>
               <div className="btc-balance-metric">
-                <span className="kpi-label">Cartão / empréstimos</span>
+                <span className="kpi-label">Cartão / contas / empréstimos</span>
                 <strong className="kpi-value due-dates-split">
-                  {dueDates.totais.dividas_cartao_credito.count} / {dueDates.totais.parcelas_emprestimos.count}
+                  {dueDates.totais.dividas_cartao_credito.count} / {dueDates.totais.contas_casa.count} /{' '}
+                  {dueDates.totais.parcelas_emprestimos.count}
                 </strong>
                 <span className="kpi-caption">
                   {formatCurrency(dueDates.totais.dividas_cartao_credito.valor)} /{' '}
+                  {formatCurrency(dueDates.totais.contas_casa.valor)} /{' '}
                   {formatCurrency(dueDates.totais.parcelas_emprestimos.valor)}
                 </span>
               </div>
@@ -141,12 +205,72 @@ export function AnalyticsOverviewPage() {
                             <strong>{formatCurrency(debt.valor)}</strong>
                             <span>Total {formatCurrency(debt.valor_total)}</span>
                           </div>
-                          <StatusBadge status={debt.situacao} />
+                          <div className="due-date-row__actions">
+                            <StatusBadge status={debt.situacao} />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              icon={<CheckCircle2 size={16} aria-hidden="true" />}
+                              disabled={
+                                payCreditCardDebtMutation.isPending &&
+                                payCreditCardDebtMutation.variables === debt.id
+                              }
+                              onClick={() => payCreditCardDebtMutation.mutate(debt.id)}
+                            >
+                              {payCreditCardDebtMutation.isPending &&
+                              payCreditCardDebtMutation.variables === debt.id
+                                ? 'Salvando'
+                                : 'Marcar pago'}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="muted">Nenhuma dívida de cartão vencendo nesta semana.</p>
+                    <p className="muted">Nenhuma dívida de cartão vencendo neste mês.</p>
+                  )}
+                </div>
+                <div className="due-dates-column">
+                  <h3>Contas de casa</h3>
+                  {dueDates.contas_casa.length ? (
+                    <div className="responsive-list">
+                      {dueDates.contas_casa.map((bill) => (
+                        <div className="due-date-row" key={`home-bill-${bill.id}`}>
+                          <div>
+                            <strong>{bill.descricao}</strong>
+                            <span>
+                              {homeBillTypeLabels[bill.tipo_conta]}
+                              {bill.fornecedor_nome ? ` · ${bill.fornecedor_nome}` : ''} · vence{' '}
+                              {formatDate(bill.data_vencimento)}
+                            </span>
+                          </div>
+                          <div>
+                            <strong>{formatCurrency(bill.valor)}</strong>
+                            <span>Conta de casa</span>
+                          </div>
+                          <div className="due-date-row__actions">
+                            <StatusBadge status={bill.situacao} />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              icon={<CheckCircle2 size={16} aria-hidden="true" />}
+                              disabled={
+                                payHomeBillMutation.isPending &&
+                                payHomeBillMutation.variables === bill.id
+                              }
+                              onClick={() => payHomeBillMutation.mutate(bill.id)}
+                            >
+                              {payHomeBillMutation.isPending &&
+                              payHomeBillMutation.variables === bill.id
+                                ? 'Salvando'
+                                : 'Marcar pago'}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">Nenhuma conta de casa vencendo neste mês.</p>
                   )}
                 </div>
                 <div className="due-dates-column">
@@ -188,14 +312,14 @@ export function AnalyticsOverviewPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="muted">Nenhuma parcela de empréstimo vencendo nesta semana.</p>
+                    <p className="muted">Nenhuma parcela de empréstimo vencendo neste mês.</p>
                   )}
                 </div>
               </div>
             ) : (
               <EmptyState
-                title="Nenhum vencimento nesta semana"
-                description="Dívidas de cartão e parcelas de empréstimos pendentes aparecerão aqui quando vencerem no período atual."
+                title="Nenhum vencimento neste mês"
+                description="Dívidas de cartão, contas de casa e parcelas de empréstimos pendentes aparecerão aqui quando vencerem no período selecionado."
               />
             )}
           </>

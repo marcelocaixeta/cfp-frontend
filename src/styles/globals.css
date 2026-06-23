@@ -954,7 +954,7 @@ a:hover {
 
 .due-dates-columns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -971,8 +971,8 @@ a:hover {
 
 .due-date-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(130px, auto) auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   gap: 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -980,16 +980,20 @@ a:hover {
   padding: 12px;
 }
 
-.due-date-row div {
+.due-date-row > div {
   display: grid;
   min-width: 0;
   gap: 4px;
 }
 
+.due-date-row > div:first-child {
+  grid-column: 1 / -1;
+}
+
 .due-date-row strong,
 .due-date-row span {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .due-date-row span {
@@ -998,6 +1002,7 @@ a:hover {
 }
 
 .due-date-row__actions {
+  align-self: center;
   justify-items: end;
 }
 

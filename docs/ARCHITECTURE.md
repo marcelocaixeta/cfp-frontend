@@ -278,19 +278,25 @@ Rotas autenticadas:
 | Rota | Pagina | Endpoint principal |
 | --- | --- | --- |
 | `/` | `HomeRedirect` | Redireciona para `/dashboard` |
-| `/dashboard` | `BtcDashboardPage` | `GET /btc/dashboard` |
+| `/dashboard` | `FinanceDashboardPage` | `GET /finance/dashboard?mes=YYYY-MM` |
 | `/btc/ativos` | `BtcAssetsPage` | `GET /btc/assets`, `POST /btc/assets` |
-| `/analises` | `AnalyticsOverviewPage` | `GET /analytics/overview` |
-| `/financas` | `FinanceSummaryPage` | `GET /finance/summary` |
+| `/analises` | `AnalyticsOverviewPage` | `GET /analytics/overview`, `GET /finance/current-week-due-dates?mes=YYYY-MM` |
+| `/financas` | `FinanceSummaryPage` | `GET /finance/summary?mes=YYYY-MM` |
 | `/financas/cartoes` | `CreditCardsPage` | `GET /finance/credit-cards` |
 | `/financas/cartoes/novo` | `CreditCardFormPage` | `POST /finance/credit-cards` |
-| `/financas/cartoes/:id` | `PlaceholderPage` | Preparada para detalhe futuro do cartao |
+| `/financas/cartoes/:id` | `CreditCardFormPage` | `GET /finance/credit-cards/{creditCard}`, `PATCH /finance/credit-cards/{creditCard}`, `DELETE /finance/credit-cards/{creditCard}` |
 | `/financas/dividas-cartao` | `CreditCardDebtsPage` | `GET /finance/credit-card-debts` |
 | `/financas/dividas-cartao/nova` | `CreditCardDebtFormPage` | `POST /finance/credit-card-debts` |
-| `/financas/dividas-cartao/:id` | `PlaceholderPage` | Preparada para detalhe futuro da divida |
+| `/financas/dividas-cartao/:id` | `CreditCardDebtFormPage` | `GET /finance/credit-card-debts/{creditCardDebt}`, `PATCH /finance/credit-card-debts/{creditCardDebt}`, `DELETE /finance/credit-card-debts/{creditCardDebt}` |
+| `/financas/contas-casa` | `HomeBillsPage` | `GET /finance/home-bills` |
+| `/financas/contas-casa/nova` | `HomeBillFormPage` | `POST /finance/home-bills` |
+| `/financas/contas-casa/:id` | `HomeBillFormPage` | `GET /finance/home-bills/{homeBill}`, `PATCH /finance/home-bills/{homeBill}`, `DELETE /finance/home-bills/{homeBill}` |
 | `/financas/emprestimos` | `LoansPage` | `GET /finance/loans` |
 | `/financas/emprestimos/novo` | `LoanFormPage` | `POST /finance/loans` |
 | `/financas/emprestimos/:id` | `LoanFormPage` | `GET /finance/loans/{loan}`, `PATCH /finance/loans/{loan}`, `DELETE /finance/loans/{loan}` |
+| `/financas/receitas-mensais` | `ReceitasMensaisPage` | `GET /finance/receitas-mensais` |
+| `/financas/receitas-mensais/nova` | `ReceitaMensalFormPage` | `POST /finance/receitas-mensais` |
+| `/financas/receitas-mensais/:id` | `ReceitaMensalFormPage` | `GET /finance/receitas-mensais/{receitaMensal}`, `PATCH /finance/receitas-mensais/{receitaMensal}`, `DELETE /finance/receitas-mensais/{receitaMensal}` |
 | `/configuracoes` | `SettingsPage` | `GET /settings` |
 | `/admin/perfis` | `UserProfilesPage` | `GET /users`, `PATCH /users/{user}/profile` |
 | `/admin/suporte` | `AdminSupportTicketsPage` | `GET /support/tickets/all`, `POST /support/tickets/{supportTicket}/messages`, `PATCH /support/tickets/{supportTicket}/resolve` |
@@ -329,20 +335,40 @@ GET    /me
 GET    /users
 PATCH  /users/{user}/profile
 
-GET    /finance/summary
-GET    /finance/current-week-due-dates
+GET    /finance/summary?mes=YYYY-MM
+GET    /finance/dashboard?mes=YYYY-MM
+GET    /finance/current-week-due-dates?mes=YYYY-MM
 
 GET    /finance/credit-cards
 POST   /finance/credit-cards
+GET    /finance/credit-cards/{creditCard}
+PATCH  /finance/credit-cards/{creditCard}
+DELETE /finance/credit-cards/{creditCard}
 
 GET    /finance/credit-card-debts
 POST   /finance/credit-card-debts
+GET    /finance/credit-card-debts/{creditCardDebt}
+PATCH  /finance/credit-card-debts/{creditCardDebt}
+DELETE /finance/credit-card-debts/{creditCardDebt}
+
+GET    /finance/home-bills
+POST   /finance/home-bills
+GET    /finance/home-bills/{homeBill}
+PATCH  /finance/home-bills/{homeBill}
+DELETE /finance/home-bills/{homeBill}
 
 GET    /finance/loans
 POST   /finance/loans
 GET    /finance/loans/{loan}
 PATCH  /finance/loans/{loan}
 DELETE /finance/loans/{loan}
+PATCH  /finance/loan-installments/{loanInstallment}/pay
+
+GET    /finance/receitas-mensais
+POST   /finance/receitas-mensais
+GET    /finance/receitas-mensais/{receitaMensal}
+PATCH  /finance/receitas-mensais/{receitaMensal}
+DELETE /finance/receitas-mensais/{receitaMensal}
 
 GET    /btc/dashboard
 GET    /btc/assets
@@ -358,6 +384,44 @@ POST   /support/tickets
 POST   /support/tickets/{supportTicket}/messages
 PATCH  /support/tickets/{supportTicket}/resolve
 ```
+
+## Regras de Negocio Financeiras
+
+### Controle dos pagamentos do mes
+
+`FinanceDashboardPage` deve tratar `/dashboard` como tela de controle dos pagamentos do mes. O frontend consome `GET /finance/dashboard?mes=YYYY-MM` e exibe os totais calculados pelo backend; ele nao deve recalcular valores sensiveis a partir de listas locais.
+
+Regra do backend:
+
+- `total_a_pagar` soma apenas itens do mes com `situacao` igual a `pending` ou `overdue`: `valor_parcela` de dividas do cartao por `primeira_data_vencimento`, `valor` de parcelas de emprestimo por `data_vencimento` e `valor` de contas de casa por `data_vencimento`.
+- Itens `paid` e `canceled` ficam fora do total. Para os status da planilha antiga, isso corresponde ao comportamento de somar o valor quando a celula nao esta marcada como `pg`.
+- `salario_liquido` soma receitas mensais do mes com `tipo_receita` igual a `salary`.
+- `total_receitas` soma todas as receitas mensais do mes.
+- `saldo` vem do backend como `total_receitas - total_a_pagar`.
+- A ordem visual da tela deve priorizar pagamentos do mes: grafico, composicao dos pagamentos, Total a pagar e Salario liquido.
+
+### Analises mensais
+
+`AnalyticsOverviewPage` deve controlar vencimentos por mes. O frontend seleciona o mes com `input type="month"` e consome `GET /finance/current-week-due-dates?mes=YYYY-MM`.
+
+Regras da tela:
+
+- Exibir o periodo retornado pela API como primeiro resumo do mes.
+- `Total do mes` soma dividas de cartao, contas de casa e parcelas de emprestimos pendentes ou vencidas no periodo selecionado.
+- As colunas de dividas de cartao, contas de casa e parcelas de emprestimos devem permitir marcar o item como pago por acao direta.
+- Ao marcar um item como pago, invalidar vencimentos mensais, resumo financeiro, dashboard financeiro e indicadores de analises.
+
+### Controle de gastos mensais
+
+`FinanceSummaryPage` deve tratar `/financas` como controle mensal de gastos. O frontend seleciona o mes com `input type="month"` e consome `GET /finance/summary?mes=YYYY-MM`.
+
+Regra do backend:
+
+- `salario_liquido` soma receitas mensais do mes com `tipo_receita` igual a `salary`.
+- `total_gastos` soma gastos do mes sem descontar itens pagos: `valor_parcela` de dividas do cartao por `primeira_data_vencimento`, `valor` de parcelas de emprestimo por `data_vencimento` e `valor` de contas de casa por `data_vencimento`.
+- Itens `paid`, `pending` e `overdue` entram no total; itens `canceled` ficam fora.
+- `saldo_previsto` vem como `salario_liquido - total_gastos`, indicando se o usuario esta gastando mais do que ganha.
+- A tela deve exibir KPIs de salario, gastos e saldo previsto, alem de grafico comparativo e composicao dos gastos.
 
 ## Modulos
 
@@ -678,11 +742,14 @@ auth.me
 btc.dashboard
 btc.assets
 analytics.overview
-finance.summary
+finance.dashboard(month)
+finance.summary(month)
+finance.dueDates(month)
 finance.creditCards
 finance.creditCardDebts
+finance.homeBills
 finance.loans
-finance.loanInstallments(loanId)
+finance.receitasMensais
 settings.current
 support.tickets
 support.ticket(ticketId)

@@ -1,4 +1,20 @@
 export type FinanceSummary = {
+  controle_gastos_mensais: {
+    periodo: {
+      mes: string;
+      inicio: string;
+      fim: string;
+    };
+    salario_liquido: string;
+    total_gastos: string;
+    saldo_previsto: string;
+    gastando_mais_do_que_ganha: boolean;
+    composicao_gastos: FinanceDashboardChartItem[];
+    grafico: {
+      tipo: 'bar';
+      itens: FinanceDashboardChartItem[];
+    };
+  };
   dividas_cartao_credito: {
     total_pendente: string;
     total_vencido: string;
@@ -37,7 +53,7 @@ export type FinanceDashboard = {
   };
 };
 
-export type CurrentWeekCreditCardDebtDueDate = {
+export type FinanceCreditCardDebtDueDate = {
   id: number;
   tipo: 'divida_cartao_credito';
   descricao: string;
@@ -53,7 +69,7 @@ export type CurrentWeekCreditCardDebtDueDate = {
   } | null;
 };
 
-export type CurrentWeekLoanInstallmentDueDate = {
+export type FinanceLoanInstallmentDueDate = {
   id: number;
   tipo: 'parcela_emprestimo';
   emprestimo_id: number;
@@ -65,15 +81,31 @@ export type CurrentWeekLoanInstallmentDueDate = {
   situacao: 'pending' | 'overdue';
 };
 
-export type CurrentWeekDueDates = {
+export type FinanceHomeBillDueDate = {
+  id: number;
+  tipo: 'conta_casa';
+  tipo_conta: HomeBillType;
+  fornecedor_nome?: string | null;
+  descricao: string;
+  data_vencimento: string;
+  valor: string;
+  situacao: 'pending' | 'overdue';
+};
+
+export type FinanceDueDates = {
   periodo: {
     inicio: string;
     fim: string;
   };
-  dividas_cartao_credito: CurrentWeekCreditCardDebtDueDate[];
-  parcelas_emprestimos: CurrentWeekLoanInstallmentDueDate[];
+  dividas_cartao_credito: FinanceCreditCardDebtDueDate[];
+  contas_casa: FinanceHomeBillDueDate[];
+  parcelas_emprestimos: FinanceLoanInstallmentDueDate[];
   totais: {
     dividas_cartao_credito: {
+      count: number;
+      valor: string;
+    };
+    contas_casa: {
       count: number;
       valor: string;
     };
