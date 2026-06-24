@@ -9,6 +9,12 @@ import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { getFinanceSummary } from '../api/financeApi';
+import {
+  financeTooltipContentStyle,
+  financeTooltipCursor,
+  financeTooltipItemStyle,
+  financeTooltipLabelStyle,
+} from '../chartTooltip';
 import type { FinanceDashboardChartItem } from '../types';
 
 const CHART_COLORS = ['#16845b', '#c2413b'];
@@ -67,7 +73,13 @@ export function FinanceSummaryPage() {
                     <BarChart data={chartData} margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
                       <XAxis dataKey="rotulo" tickLine={false} />
                       <YAxis tickFormatter={(value) => formatCurrency(String(value))} width={88} />
-                      <Tooltip formatter={(value) => formatCurrency(String(value))} />
+                      <Tooltip
+                        contentStyle={financeTooltipContentStyle}
+                        cursor={financeTooltipCursor}
+                        formatter={(value) => formatCurrency(String(value))}
+                        itemStyle={financeTooltipItemStyle}
+                        labelStyle={financeTooltipLabelStyle}
+                      />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                         {chartData.map((item, index) => (
                           <Cell key={item.chave} fill={CHART_COLORS[index % CHART_COLORS.length]} />

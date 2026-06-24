@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { Button } from '../../../components/ui/Button';
 import { Alert } from '../../../components/ui/Alert';
+import { defaultAuthenticatedRoute } from '../../../config/routes';
 import { useAuth } from '../useAuth';
 import { AuthLayout } from './AuthLayout';
 
@@ -21,7 +22,7 @@ export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/dashboard';
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? defaultAuthenticatedRoute;
   const {
     formState: { errors, isSubmitting },
     handleSubmit,

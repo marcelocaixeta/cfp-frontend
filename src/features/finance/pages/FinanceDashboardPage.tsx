@@ -8,6 +8,12 @@ import { Skeleton } from '../../../components/ui/Skeleton';
 import { queryKeys } from '../../../config/queryKeys';
 import { formatCurrency } from '../../../lib/formatting/currency';
 import { getFinanceDashboard } from '../api/financeApi';
+import {
+  financeTooltipContentStyle,
+  financeTooltipCursor,
+  financeTooltipItemStyle,
+  financeTooltipLabelStyle,
+} from '../chartTooltip';
 import type { FinanceDashboardChartItem } from '../types';
 
 const CHART_COLORS = ['#16845b', '#c2413b', '#1769aa', '#d78b17', '#6d5bd0', '#4f6f52'];
@@ -71,7 +77,13 @@ export function FinanceDashboardPage() {
                           <Cell key={item.chave} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => formatCurrency(String(value))} />
+                      <Tooltip
+                        contentStyle={financeTooltipContentStyle}
+                        cursor={financeTooltipCursor}
+                        formatter={(value) => formatCurrency(String(value))}
+                        itemStyle={financeTooltipItemStyle}
+                        labelStyle={financeTooltipLabelStyle}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { defaultAuthenticatedRoute } from '../../../config/routes';
 import { useAuth } from '../useAuth';
 import { AuthLayout } from './AuthLayout';
 
@@ -36,7 +37,7 @@ export function RegisterPage() {
   async function onSubmit(input: RegisterForm) {
     setError(null);
     await registerUser(input).then(
-      () => navigate('/dashboard', { replace: true }),
+      () => navigate(defaultAuthenticatedRoute, { replace: true }),
       (requestError) => setError(requestError),
     );
   }

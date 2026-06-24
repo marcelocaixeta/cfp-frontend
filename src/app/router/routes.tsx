@@ -25,6 +25,7 @@ import { SupportTicketFormPage } from '../../features/support/pages/SupportTicke
 import { SupportTicketsPage } from '../../features/support/pages/SupportTicketsPage';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { PlaceholderPage } from '../../pages/PlaceholderPage';
+import { defaultAuthenticatedRoute } from '../../config/routes';
 import { AdminRoute } from './AdminRoute';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -55,7 +56,7 @@ export const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
+          { index: true, element: <Navigate to={defaultAuthenticatedRoute} replace /> },
           { path: '/dashboard', element: <FinanceDashboardPage /> },
           { path: '/btc/ativos', element: <BtcAssetsPage /> },
           { path: '/analises', element: <AnalyticsOverviewPage /> },
